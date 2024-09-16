@@ -1,13 +1,17 @@
 # Proje Yönerge Raporu
 
 ## Proje Tanımı
-Bu proje kapsamında, dört temel matematiksel işlem (toplama, çıkarma, çarpma ve bölme) ve değişken tanımlama ile değişkenlere değer atama işlemlerini gerçekleştirebilen bir programlama dili geliştirilecektir. Bu dil, basit aritmetik işlemleri yapabilen ve değişkenler üzerinden sonuçlar üretebilen bir yapı sunacaktır.
+...
 
 Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. Bu araçlar dilin lexik analizinden, parçacık üretimine, derlenmesine ve optimizasyonuna kadar tüm aşamalarda kullanılacaktır.
 
-## Amaç
-- Basit bir dil oluşturmak.
-- Bu dilde değişken tanımlama ve dört temel matematiksel işlem yapılabilmesini sağlamak.
+## Amaç ve önemli özellikler
+- Basit ve hızlı bir dil modeli.
+- Statik tipleme, fonksiyonel ve logic özellikler.
+- Türler açısından sadelik
+- Belleğe erişimli
+- Katı ve sade built-in işlevler
+- Precompiler optimizasyon
 - Derlenebilir bir yapı kurmak ve bu süreci açık kaynak araçlarla yürütmek.
 - Proje aşamalarını yönetmek ve açık kaynak platformlarda paylaşmak.
 
@@ -36,7 +40,7 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 ## Proje Aşamaları
 
 ### 1. **Dil Tasarımı**
-   - Dil, kullanıcıya dört temel işlem (toplama, çıkarma, çarpma, bölme) yapma ve değişken tanımlama olanakları sunacak.
+   - Bu kısım zamanla geliştirilmeye devam edilecek.
    - Değişken atama ve işlem örnekleri:
      ```
      a = 5;
@@ -80,11 +84,3 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 ### 4. **Git ile Versiyon Kontrolü**
    - Tüm değişiklikler ve kod versiyonları Git ile takip edilecek.
    - Proje GitHub gibi bir açık kaynak platformda yayınlanacak.
-
-## Proje Teslimi
-- **Dökümantasyon**: Projenin teknik detaylarını içeren dökümanlar hazırlanacak.
-- **Kod Paylaşımı**: GitHub üzerinde açık kaynak olarak kod paylaşımı yapılacak.
-- **Test ve Sonuçlar**: Dört işlem ve değişken atama test edilerek sonuçlar dökümante edilecek.
-
-## Sonuç
-Bu proje ile temel dört işlemi ve değişken atamalarını destekleyen basit bir programlama dili geliştirilmiş olacak. Projenin tamamı açık kaynak yazılımlar kullanılarak gerçekleştirilecek ve geliştiriciler için modüler, derlenebilir bir yapı sunulacaktır.
