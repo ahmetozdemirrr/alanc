@@ -49,10 +49,81 @@ After adding or modifying tokens, you can test the tokenization process by provi
 ```bash
 flex lexer.l
 gcc lex.yy.c -o scanner
-./scanner < sample_code.txt
+./scanner < sample_code.alan
 
 # or
 
 ./scanner # for REPL
 ```
 
+Scenario for `test.alan`:
+
+```
+ahmete@ahmete-Inspiron-14-5401:~/A-proglang/Lexer$ flex lexer.l 
+ahmete@ahmete-Inspiron-14-5401:~/A-proglang/Lexer$ gcc lex.yy.c -o lexer -lfl
+ahmete@ahmete-Inspiron-14-5401:~/A-proglang/Lexer$ ./lexer < test.alan
+KW_INCLUDE
+IDENTIFIER
+KW_FUNCTION
+IDENTIFIER
+OP_OPEN_P
+KW_INT
+IDENTIFIER
+OP_COMMA
+KW_FLOAT
+IDENTIFIER
+OP_CLOSE_P
+OP_OPEN_CURLY
+KW_STR
+IDENTIFIER
+OP_EQUAL
+IDENTIFIER
+IDENTIFIER
+OP_PLUS
+IDENTIFIER
+OP_EQUAL
+IDENTIFIER
+OP_CLOSE_CURLY
+KW_PROCEDURE
+IDENTIFIER
+OP_OPEN_P
+OP_CLOSE_P
+OP_OPEN_CURLY
+KW_BOOL
+IDENTIFIER
+OP_COMMA
+IDENTIFIER
+OP_SEMICOLON
+IDENTIFIER
+POINTER
+IDENTIFIER
+OP_CLOSE_CURLY
+KW_INT
+IDENTIFIER
+OP_OPEN_P
+OP_CLOSE_P
+OP_OPEN_CURLY
+IDENTIFIER
+OP_OPEN_SQU
+OP_CLOSE_SQU
+OP_EQUAL
+OP_OPEN_CURLY
+INTEGER
+OP_COMMA
+INTEGER
+OP_COMMA
+INTEGER
+OP_CLOSE_CURLY
+IDENTIFIER
+OP_OPEN_P
+IDENTIFIER
+OP_OPEN_P
+OP_CLOSE_P
+OP_CLOSE_P
+KW_RETURN
+IDENTIFIER
+OP_SEMICOLON
+OP_CLOSE_CURLY
+COMMENT
+ahmete@ahmete-Inspiron-14-5401:~/A-proglang/Lexer$
+```
