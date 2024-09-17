@@ -23,7 +23,7 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 
 ### 2. **Bison**
 - **Görevi**: Parçacık (parser) üretmek.
-- **Sorumluluk**: Flex tarafından üretilen tokenlere göre dilin sözdizimini oluşturacak. Dört işlem ve değişken atama gibi yapıları tanımlayacak.
+- **Sorumluluk**: Flex tarafından üretilen tokenlere göre dilin sözdizimini oluşturacak.
 
 ### 3. **LLVM**
 - **Görevi**: Dilin makine koduna derlenmesi ve optimize edilmesi.
