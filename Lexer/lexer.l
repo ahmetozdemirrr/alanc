@@ -1,9 +1,11 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    #include "../include/tokens.h"
-    #include "../include/keywords.h"
-    // #include "y.tab.h" // BİSON generates this file
+    // #include "../include/operators.h"
+    // #include "../include/keywords.h"
+    #include "../Parser/parser.tab.h" /* BİSON generates this file */
+
+    // extern int yylval;
 %}
 
 %option noyywrap
@@ -24,13 +26,13 @@
 /*regular expressions*/
 
 COMMENT         [#].*
-INTEGER         [0-9]+
+INTEGER         [-]?[0-9]+
+FLOAT           [-]?[0-9]+[.][0-9]+
 IDENTIFIER      [a-zA-Z][a-zA-Z0-9_]{0,31} 
 WHITESPACE      [ \t\n]+
 WHITESPACES     [\\t\\n]+
-SIGN            [^+-/*()= \n\t{}[].,<>;] 
+SIGN            [^*+-/()= \n\t{}[].,<>;] 
 POINTER         "->"
-NEWLINE         \n
 
 /* KEYWORD, OPERATOR and other tokens */
 
@@ -53,47 +55,57 @@ NEWLINE         \n
 [<]             { return OP_OPEN_ANGLE;   }
 [>]             { return OP_CLOSE_ANGLE;  }
 [;]             { return OP_SEMICOLON;    }
-
 if              { return KW_IF;           }
 else            { return KW_ELSE;         }
 elif            { return KW_ELIF;         }
-true            { return KW_TRUE;         }
-false           { return KW_FALSE;        }
 int             { return KW_INT;          }
 float           { return KW_FLOAT;        }
 bool            { return KW_BOOL;         }
 str             { return KW_STR;          }
-null            { return KW_NULL;         }
 function        { return KW_FUNCTION;     }
 procedure       { return KW_PROCEDURE;    }
 include         { return KW_INCLUDE;      }
 return          { return KW_RETURN;       }
-
 {COMMENT}       { return COMMENT;         }
 
+true            {
+                    yylval.boolean = 1; 
+                    return KW_TRUE;         
+                }
+false           { 
+                    yylval.boolean = 0;
+                    return KW_FALSE;        
+                }
+null            { 
+                    yylval.nullval = NULL;
+                    return KW_NULL;         
+                }
 {IDENTIFIER}    { 
-                    //yylval.string = strdup(yytext); 
+                    yylval.string = strdup(yytext); 
                     return IDENTIFIER;  
                 }
-
 {INTEGER}       {
-                    //yylval.string = strdup(yytext); 
+                    yylval.intval = atoi(yytext); 
                     return INTEGER;     
                 }
-
+{FLOAT}         {
+                    yylval.floatval = atof(yytext); 
+                    return FLOAT;     
+                }
 {WHITESPACE}    { ; }
 {WHITESPACES}   { ; }
 
-
 {SIGN}+[a-zA-Z0-9]+         { 
+                                /* give syntax error if identifiers are preceded by a SIGN */
                                 fprintf(stderr, "SYNTAX ERROR '%s' cannot be tokenized\n",yytext); 
                                 exit(EXIT_FAILURE);
                             }  
 
 {SIGN}+[a-zA-Z0-9]+{SIGN}+  { 
+                                /* give syntax error if identifiers are contain a SIGN */
                                 fprintf(stderr, "SYNTAX ERROR '%s' cannot be tokenized\n",yytext); 
                                 exit(EXIT_FAILURE);
-                            }         
+                            }  
 
 .                           {    
                                 /* Any other overlap errors */
@@ -102,174 +114,37 @@ return          { return KW_RETURN;       }
                             }
 %%
 
-int main() /* main function for testing */
+/* 
+
+int main()  main function for testing 
 {
     int control;
 
-    /* 
-        yylex(), bir token akışı sağlayan ve girdiyi satır satır veya 
-        karakter karakter tarayıp belirli kalıplara (örneğin sayılar, 
-        kelimeler, operatörler) göre token'lar döndüren işlevdir.
+    yylex(), which provides a stream of tokens and inputs line by line or 
+    scans character by character and matches certain patterns (e.g. numbers, 
+    It is a function that returns tokens based on (words, operators).
 
-        yylex() Fonksiyonunun İşlevi:
+    Function of yylex() Function:
 
-        - Token Üretme: yylex() girdiyi analiz eder ve her çağrıldığında 
-        bir sonraki token'ı döndürür. Bu token, dilin yapısına uygun bir 
-        enum değeri olabilir (örneğin: OP_PLUS veya KW_IF).
+    - Token Generation: yylex() analyzes the input and generates it every time it is called. 
+    Returns the next token. This token is in accordance with the structure of the language. 
+    It can be an enum value (for example: OP_PLUS or KW_IF).
 
-        - Girdi Tarama: yylex() fonksiyonu girdiyi satır satır tarar ve 
-        lexer tarafından tanımlanan regular expression'lara (düzenli 
-        ifadelere) uygun parçaları yakalar. Her yakalanan kısım bir token 
-        olarak işlenir.
+    - Input Scanning: yylex() function scans the input line by line and 
+    Regular expressions defined by lexer 
+    captures the appropriate parts (expressions). Each captured portion is a token 
+    It is processed as .
 
-        - Girdi Akışını İşlemek: yylex() genellikle kaynak dosya veya 
-        standart giriş (stdin) üzerinden çalışır. Dosyadaki veya 
-        girdideki her satırı okur ve karakterleri tanımlanan düzenli 
-        ifadelere göre token'lara ayırır.
-    */
+    - Processing the Input Stream: yylex() is usually the source file or 
+    It runs over standard input (stdin). in the file or 
+    reads each line in the input and reads the characters in the defined order 
+    It divides into tokens according to expressions.
+    
     while(control = yylex())
     {
-        switch (control)
-        {
-            case 1:
-                printf("OP_PLUS\n");
-                break;
-
-            case 2:
-                printf("OP_MINUS\n");
-                break;
-
-            case 3:
-                printf("OP_MULT\n");
-                break;
-
-            case 4:
-                printf("OP_DIV\n");
-                break;
-
-            case 5:
-                printf("OP_OPEN_P\n");
-                break;  
-
-            case 6:
-                printf("OP_CLOSE_P\n");
-                break;  
-
-            case 7:
-                printf("INTEGER\n");
-                break;   
-
-            case 8:
-                printf("IDENTIFIER\n");
-                break;
-
-            case 9:
-                printf("COMMENT\n");
-                break;     
-
-            case 10:
-                printf("OP_EQUAL\n");
-                break; 
-
-            case 11:
-                printf("POINTER\n");
-                break; 
-
-            case 12:
-                printf("OP_OPEN_CURLY\n");
-                break; 
-
-            case 13:
-                printf("OP_CLOSE_CURLY\n");
-                break; 
-
-            case 14:
-                printf("OP_OPEN_SQU\n");
-                break; 
-
-            case 15:
-                printf("OP_CLOSE_SQU\n");
-                break; 
-
-            case 16:
-                printf("OP_COMMA\n");
-                break; 
-
-            case 17:
-                printf("OP_DOT\n");
-                break; 
-
-            case 18:
-                printf("OP_OPEN_ANGLE\n");
-                break; 
-
-            case 19:
-                printf("OP_CLOSE_ANGLE\n");
-                break; 
-
-            case 20:
-                printf("OP_SEMICOLON\n");
-                break; 
-
-            case 21:
-                printf("KW_IF\n");
-                break;
-
-            case 22:
-                printf("KW_ELSE\n");
-                break;
-
-            case 23:
-                printf("KW_ELIF\n");
-                break;
-
-            case 24:
-                printf("KW_TRUE\n");
-                break;
-
-            case 25:
-                printf("KW_FALSE\n");
-                break;  
-
-            case 26:
-                printf("KW_INT\n");
-                break;  
-
-            case 27:
-                printf("KW_FLOAT\n");
-                break;   
-
-            case 28:
-                printf("KW_BOOL\n");
-                break;
-
-            case 29:
-                printf("KW_STR\n");
-                break;     
-
-            case 30:
-                printf("KW_NULL\n");
-                break; 
-
-            case 31:
-                printf("KW_FUNCTION\n");
-                break; 
-
-            case 32:
-                printf("KW_PROCEDURE\n");
-                break; 
-
-            case 33:
-                printf("KW_INCLUDE\n");
-                break; 
-
-            case 34:
-                printf("KW_RETURN\n");
-                break;
-
-            default:
-                break;
-        }
+        printf("Token: %d\n", control);
     }
     return 0;
-}
+} 
+
+*/
