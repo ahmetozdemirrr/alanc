@@ -11,7 +11,7 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 - Türler açısından sadelik
 - Belleğe erişimli
 - Katı ve sade built-in işlevler
-- Precompiler optimizasyon
+- Optimizasyon odaklı
 - Derlenebilir bir yapı kurmak ve bu süreci açık kaynak araçlarla yürütmek.
 - Proje aşamalarını yönetmek ve açık kaynak platformlarda paylaşmak.
 
@@ -27,7 +27,7 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 
 ### 3. **LLVM**
 - **Görevi**: Dilin makine koduna derlenmesi ve optimize edilmesi.
-- **Sorumluluk**: Dört işlem ve değişken atamaları gibi işlemlerin düşük seviyede kod üretilmesini sağlayacak. LLVM, dilin arka ucunda çalışarak derleme ve optimizasyon yapacak.
+- **Sorumluluk**: Düşük seviyede kod üretilmesini sağlayacak. LLVM, dilin arka ucunda çalışarak derleme ve optimizasyon yapacak.
 
 ### 4. **CMake**
 - **Görevi**: Derleme sistemini yönetmek.
@@ -37,50 +37,44 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 - **Görevi**: Versiyon kontrolü.
 - **Sorumluluk**: Proje dosyalarının sürüm takibini yapacak ve açık kaynak olarak paylaşımı yönetecek.
 
-## Proje Aşamaları
+Örnek bir kod:
 
-### 1. **Dil Tasarımı**
-   - Bu kısım zamanla geliştirilmeye devam edilecek.
-   - Değişken atama ve işlem örnekleri:
-     ```
-     a = 5;
-     b = 10;
-     c = a + b;
-     print(c);
-     ```
-   - Her işlem satır sonu noktasıyla (`;`) bitirilecek.
+```
+include standart.ALan
 
-### 2. **Lexik Analiz (Flex ile)**
-   - **Token Tanımları**: Değişken isimleri, sayılar ve işleçler için tokenler tanımlanacak.
-   - Flex kullanılarak dilin girdi akışı anlamlı parçalara ayrılacak.
+function foo(int a, float b)
+{
+    return (a * (b * 3));
+}
 
-### 3. **Sözdizimi Analizi (Bison ile)**
-   - **Sözdizimi Kuralları**: Dört temel işlem ve değişken atama kuralları Bison ile tanımlanacak.
-   - Girdi, Bison tarafından dilin gramer kurallarına göre analiz edilecek ve doğru yapılarda işlenecek.
+procedure poo()
+{
+    bool b1 = true;
+    bool b2 = false;
 
-### 4. **Kod Üretimi (LLVM ile)**
-   - **Kod Üretim Aşaması**: Bison tarafından analiz edilen girdi LLVM kullanılarak makine koduna dönüştürülecek.
-   - **Optimizasyon**: Kodun daha verimli çalışması için LLVM'in optimizasyon özelliklerinden yararlanılacak.
+    if (b1 == b2)
+    {
+        b1 -> b2;
+    }
+    
+    else
+    {
+        return;
+    }
 
-### 5. **Derleme ve Yapılandırma (CMake ile)**
-   - **CMake Kullanımı**: Flex, Bison ve LLVM araçlarını entegre ederek proje derlenecek.
-   - Derleme işlemi sırasında tüm bağımlılıklar yönetilecek ve çalıştırılabilir bir dosya üretilecek.
+    print(Procedure end!);
+}
 
-### 6. **Versiyon Kontrol ve İşbirliği (Git ile)**
-   - **Git Kullanımı**: Proje süresince değişiklikler versiyon kontrol sistemi Git ile takip edilecek.
-   - Kod açık kaynak platformlarda (örneğin GitHub) paylaşılacak ve işbirliği sağlanacak.
+procedure main()
+{
+    int array[] = {2, 3, 4};
 
-## Yapılandırma ve Geliştirme Aşamaları
+    poo(foo());
 
-### 1. **Flex ve Bison Entegrasyonu**
-   - Flex ile tokenler üretilecek ve Bison bu tokenlere göre dilin sözdizimini yönetecek.
+    input(Enter a number:);
+    
+    return EXIT_SUCCESS;
+}
 
-### 2. **LLVM ile Kod Üretimi**
-   - Kod üretimi ve optimizasyon için LLVM kullanılacak. Bu aşamada performans odaklı geliştirmeler yapılacak.
-
-### 3. **CMake ile Derleme**
-   - Tüm araçlar CMake kullanılarak birleştirilecek ve proje derlenecek.
-
-### 4. **Git ile Versiyon Kontrolü**
-   - Tüm değişiklikler ve kod versiyonları Git ile takip edilecek.
-   - Proje GitHub gibi bir açık kaynak platformda yayınlanacak.
+# This is a comment and this is a expression ; x = y + 5 (but in a comment line)
+```

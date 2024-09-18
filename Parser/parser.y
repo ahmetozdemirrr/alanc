@@ -33,7 +33,7 @@
 %token <floatval> FLOAT
 %token <string> IDENTIFIER
 %token <string> COMMENT
-%token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_EQUAL
+%token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_EQUAL NEWLINE
 %token OP_OPEN_P OP_CLOSE_P OP_OPEN_CURLY OP_CLOSE_CURLY
 %token OP_OPEN_SQU OP_CLOSE_SQU OP_COMMA OP_DOT
 %token OP_OPEN_ANGLE OP_CLOSE_ANGLE OP_SEMICOLON POINTER
@@ -50,7 +50,8 @@
 %%
     PROGRAM:
         /* Empty program */
-        | PROGRAM STATEMENT
+        |   PROGRAM STATEMENT
+        |   PROGRAM NEWLINE
         ;
 
     STATEMENT:
@@ -67,12 +68,14 @@
                 )
                 - add string type of language (Pyhton like definition)
                 - add boolean statement (if-elif-else)
+                - type mismatch control
             */
 
         |   KW_INT   IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_int_var($4));    }
         |   KW_FLOAT IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_float_var($4));  }
-        |   KW_BOOL  IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_bool_var($4)); }
+        |   KW_BOOL  IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_bool_var($4));   }
         /* |   KW_STR   IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var($2, create_bool_var($4));   } */
+        |   OP_SEMICOLON 
         ;
 
     EXPRESSION:
@@ -97,7 +100,7 @@
         ;
 
     INT_EXP:
-            INTEGER { $$ = $1; }
+            INTEGER     { $$ = $1; }
         ;
 
     BOOL_EXP:
@@ -110,17 +113,24 @@
         ;
 %%
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
     /* yydebug = 0;   inactivating debugging */
-    yydebug = 1;     /* activating debugging */
+    yydebug = 0;     /* activating debugging */
 
     symbol_table = create_symbol_table();
 
     if (argc == 1)
     {
         printf("Type (ctrl+c) for exit\n");
-        printf(">\n");
+
+        while (1)
+        {
+            printf("> ");
+            yyparse();
+            /* Girdiyi temizlemek için */
+            yyclearin;
+        }
     }
 
     else if (argc == 2)
@@ -132,15 +142,17 @@ int main(int argc, char *argv[])
             printf("File not found\n");
             return 0;
         }
+        yyparse();
     }
-
-    else 
+    
+    else
     {
         printf("Too many arguments\n");
-        printf("Usage: ./gpp_interpreter or ./gpp_interpreter <filename>\n");
+        printf("Usage: ./parser or ./parser <filename>\n");
         return 0;
     }
-    yyparse();
+
+    return 0;
 }
 /*   
 

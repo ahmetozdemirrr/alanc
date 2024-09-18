@@ -1,14 +1,13 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    // #include "../include/operators.h"
-    // #include "../include/keywords.h"
     #include "../Parser/parser.tab.h" /* BİSON generates this file */
 
-    // extern int yylval;
+    int yycolumn = 1;
 %}
 
 %option noyywrap
+%option yylineno
 
 /*----------------------------------------------------------------------------------------------
 |                                                                                              |
@@ -29,71 +28,170 @@ COMMENT         [#].*
 INTEGER         [-]?[0-9]+
 FLOAT           [-]?[0-9]+[.][0-9]+
 IDENTIFIER      [a-zA-Z][a-zA-Z0-9_]{0,31} 
-WHITESPACE      [ \t\n]+
-WHITESPACES     [\\t\\n]+
+WHITESPACE      [ \t]+
 SIGN            [^*+-/()= \n\t{}[].,<>;] 
 POINTER         "->"
+
+/*
+    TO DO: 
+    INTEGER ve FLOAT tanımlarında baştaki opsiyonel 
+    '-' operatörü sorun yaratıyor binary işlemlerde
+*/
 
 /* KEYWORD, OPERATOR and other tokens */
 
 %%
 
-[+]             { return OP_PLUS;         }
-[-]             { return OP_MINUS;        }
-[*]             { return OP_MULT;         }
-[/]             { return OP_DIV;          }
-[(]             { return OP_OPEN_P;       }
-[)]             { return OP_CLOSE_P;      }
-[=]             { return OP_EQUAL;        }
-"->"            { return POINTER;         }
-[.]             { return OP_DOT;          }
-[,]             { return OP_COMMA;        }
-[{]             { return OP_OPEN_CURLY;   }
-[}]             { return OP_CLOSE_CURLY;  }
-[[]             { return OP_OPEN_SQU;     }
-[]]             { return OP_CLOSE_SQU;    }
-[<]             { return OP_OPEN_ANGLE;   }
-[>]             { return OP_CLOSE_ANGLE;  }
-[;]             { return OP_SEMICOLON;    }
-if              { return KW_IF;           }
-else            { return KW_ELSE;         }
-elif            { return KW_ELIF;         }
-int             { return KW_INT;          }
-float           { return KW_FLOAT;        }
-bool            { return KW_BOOL;         }
-str             { return KW_STR;          }
-function        { return KW_FUNCTION;     }
-procedure       { return KW_PROCEDURE;    }
-include         { return KW_INCLUDE;      }
-return          { return KW_RETURN;       }
-{COMMENT}       { return COMMENT;         }
+[+]             {
+                    yycolumn += yyleng; 
+                    return OP_PLUS;
+                }
+[-]             {
+                    yycolumn += yyleng; 
+                    return OP_MINUS;        
+                }
+[*]             {
+                    yycolumn += yyleng; 
+                    return OP_MULT;         
+                }
+[/]             {
+                    yycolumn += yyleng; 
+                    return OP_DIV;          
+                }
+[(]             {
+                    yycolumn += yyleng; 
+                    return OP_OPEN_P;       
+                }
+[)]             {
+                    yycolumn += yyleng; 
+                    return OP_CLOSE_P;      
+                }
+[=]             {
+                    yycolumn += yyleng; 
+                    return OP_EQUAL;        
+                }
+"->"            {
+                    yycolumn += yyleng; 
+                    return POINTER;         
+                }
+[.]             {
+                    yycolumn += yyleng; 
+                    return OP_DOT;          
+                }
+[,]             {
+                    yycolumn += yyleng; 
+                    return OP_COMMA;        
+                }
+[{]             {
+                    yycolumn += yyleng; 
+                    return OP_OPEN_CURLY;   
+                }
+[}]             {
+                    yycolumn += yyleng; 
+                    return OP_CLOSE_CURLY;  
+                }
+[[]             {
+                    yycolumn += yyleng; 
+                    return OP_OPEN_SQU;     
+                }
+[]]             {
+                    yycolumn += yyleng; 
+                    return OP_CLOSE_SQU;    
+                }
+[<]             {
+                    yycolumn += yyleng; 
+                    return OP_OPEN_ANGLE;   
+                }
+[>]             {
+                    yycolumn += yyleng; 
+                    return OP_CLOSE_ANGLE;  
+                }
+[;]             {
+                    yycolumn += yyleng; 
+                    return OP_SEMICOLON;    
+                }
+if              {
+                    yycolumn += yyleng; 
+                    return KW_IF;           
+                }
+else            {
+                    yycolumn += yyleng; 
+                    return KW_ELSE;         
+                }
+elif            {
+                    yycolumn += yyleng; 
+                    return KW_ELIF;         
+                }
+int             {
+                    yycolumn += yyleng; 
+                    return KW_INT;          
+                }
+float           {
+                    yycolumn += yyleng; 
+                    return KW_FLOAT;        
+                }
+bool            {
+                    yycolumn += yyleng; 
+                    return KW_BOOL;         
+                }
+str             {
+                    yycolumn += yyleng; 
+                    return KW_STR;          
+                }
+function        {
+                    yycolumn += yyleng; 
+                    return KW_FUNCTION;     
+                }
+procedure       {
+                    yycolumn += yyleng; 
+                    return KW_PROCEDURE;    
+                }
+include         {
+                    yycolumn += yyleng; 
+                    return KW_INCLUDE;      
+                }
+return          {
+                    yycolumn += yyleng; 
+                    return KW_RETURN;       
+                }
+{COMMENT}       { /* return COMMENT; */   }
 
+\n              {
+                    yycolumn += yyleng; 
+                    yycolumn = 1;
+                    return NEWLINE; 
+                }
 true            {
+                    yycolumn += yyleng;
                     yylval.boolean = 1; 
                     return KW_TRUE;         
                 }
-false           { 
+false           {
+                    yycolumn += yyleng; 
                     yylval.boolean = 0;
                     return KW_FALSE;        
                 }
-null            { 
+null            {
+                    yycolumn += yyleng; 
                     yylval.nullval = NULL;
                     return KW_NULL;         
                 }
-{IDENTIFIER}    { 
+{IDENTIFIER}    {
+                    yycolumn += yyleng; 
                     yylval.string = strdup(yytext); 
                     return IDENTIFIER;  
                 }
 {INTEGER}       {
+                    yycolumn += yyleng;
                     yylval.intval = atoi(yytext); 
                     return INTEGER;     
                 }
 {FLOAT}         {
+                    yycolumn += yyleng;
                     yylval.floatval = atof(yytext); 
                     return FLOAT;     
                 }
-{WHITESPACE}    { ; }
-{WHITESPACES}   { ; }
+{WHITESPACE}    { yycolumn += yyleng; }
 
 {SIGN}+[a-zA-Z0-9]+         { 
                                 /* give syntax error if identifiers are preceded by a SIGN */
@@ -109,7 +207,7 @@ null            {
 
 .                           {    
                                 /* Any other overlap errors */
-                                fprintf(stderr, "SYNTAX ERROR: '%s' cannot be tokenized\n", yytext);
+                                fprintf(stderr, "Unrecognized character: '%s'\n", yytext);
                                 exit(EXIT_FAILURE); 
                             }
 %%

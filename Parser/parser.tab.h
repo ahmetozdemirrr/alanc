@@ -77,18 +77,19 @@ extern int yydebug;
     OP_MULT = 278,                 /* OP_MULT  */
     OP_DIV = 279,                  /* OP_DIV  */
     OP_EQUAL = 280,                /* OP_EQUAL  */
-    OP_OPEN_P = 281,               /* OP_OPEN_P  */
-    OP_CLOSE_P = 282,              /* OP_CLOSE_P  */
-    OP_OPEN_CURLY = 283,           /* OP_OPEN_CURLY  */
-    OP_CLOSE_CURLY = 284,          /* OP_CLOSE_CURLY  */
-    OP_OPEN_SQU = 285,             /* OP_OPEN_SQU  */
-    OP_CLOSE_SQU = 286,            /* OP_CLOSE_SQU  */
-    OP_COMMA = 287,                /* OP_COMMA  */
-    OP_DOT = 288,                  /* OP_DOT  */
-    OP_OPEN_ANGLE = 289,           /* OP_OPEN_ANGLE  */
-    OP_CLOSE_ANGLE = 290,          /* OP_CLOSE_ANGLE  */
-    OP_SEMICOLON = 291,            /* OP_SEMICOLON  */
-    POINTER = 292                  /* POINTER  */
+    NEWLINE = 281,                 /* NEWLINE  */
+    OP_OPEN_P = 282,               /* OP_OPEN_P  */
+    OP_CLOSE_P = 283,              /* OP_CLOSE_P  */
+    OP_OPEN_CURLY = 284,           /* OP_OPEN_CURLY  */
+    OP_CLOSE_CURLY = 285,          /* OP_CLOSE_CURLY  */
+    OP_OPEN_SQU = 286,             /* OP_OPEN_SQU  */
+    OP_CLOSE_SQU = 287,            /* OP_CLOSE_SQU  */
+    OP_COMMA = 288,                /* OP_COMMA  */
+    OP_DOT = 289,                  /* OP_DOT  */
+    OP_OPEN_ANGLE = 290,           /* OP_OPEN_ANGLE  */
+    OP_CLOSE_ANGLE = 291,          /* OP_CLOSE_ANGLE  */
+    OP_SEMICOLON = 292,            /* OP_SEMICOLON  */
+    POINTER = 293                  /* POINTER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -105,7 +106,7 @@ union YYSTYPE
     int    boolean;     /* for Boolean types (0 or 1) */
     void * nullval;     /* for Null                   */
 
-#line 109 "Parser/parser.tab.h"
+#line 110 "Parser/parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
