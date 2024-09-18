@@ -2,16 +2,20 @@ include standart.ALan
 
 function foo(int a, float b)
 {
-    str string = ahmet;
-    a + b = ba;
+    if (a < 0)
+    {
+        return a;
+    }
+    return (a * (foo(a - 3, b + 3));
 }
 
 procedure poo()
 {
-    bool b1 = true;
-    bool b2 = false;
+    int b1 = 3;
+    int * b2;
+    int b3 = true;
 
-    if (b1 == b2)
+    if (b3)
     {
         b1 -> b2;
     }
@@ -28,7 +32,7 @@ procedure main()
 {
     int array[] = {2, 3, 4};
 
-    foo(poo());
+    poo(foo());
 
     input(Enter a number:);
     
