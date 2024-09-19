@@ -46,6 +46,7 @@
 
 %left OP_PLUS OP_MINUS   /* Toplama ve çıkarma operatörleri için sol bağlayıcılık */
 %left OP_MULT OP_DIV     /* Çarpma ve bölme operatörleri için sol bağlayıcılık    */
+%right UNARY_MINUS
 
 %%
     PROGRAM:
@@ -97,6 +98,13 @@
                                                     $$ = $1 / $3; 
                                                 } 
                                             }
+        /*-----------------------------------------------------------------
+            When you define both unary and binary - operators, Bison may
+            experience ambiguity due to the different uses of this symbol.
+            Using %prec, you can resolve this ambiguity by assigning a 
+            special precedence to the unary minus operator.
+        -----------------------------------------------------------------*/
+        | OP_MINUS EXPRESSION %prec UNARY_MINUS  { $$ = -$2; }
         ;
 
     INT_EXP:
@@ -128,7 +136,7 @@ int main(int argc, char * argv[])
         {
             printf("> ");
             yyparse();
-            /* Girdiyi temizlemek için */
+            /* cleaning input */
             yyclearin;
         }
     }

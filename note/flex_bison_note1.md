@@ -17,7 +17,7 @@ Flex, metin tabanlı girdileri tarayarak token'lara dönüştüren bir lexer (le
 **Örnek:**
 
 ```
-cCopy codeint main(void) {
+int main(void) {
     int token;
     while ((token = yylex()) != 0) {
         printf("Token: %d\n", token);
@@ -35,7 +35,7 @@ cCopy codeint main(void) {
 **Örnek:**
 
 ```
-lexCopy code[a-zA-Z][a-zA-Z0-9_]* {
+[a-zA-Z][a-zA-Z0-9_]* {
     printf("Tanımlayıcı: %s\n", yytext);
     return IDENTIFIER;
 }
@@ -50,7 +50,7 @@ lexCopy code[a-zA-Z][a-zA-Z0-9_]* {
 **Örnek:**
 
 ```
-lexCopy code[ \t]+ {
+[ \t]+ {
     yycolumn += yyleng;
 }
 ```
@@ -66,7 +66,7 @@ lexCopy code[ \t]+ {
 **Örnek:**
 
 ```
-lexCopy code%option yylineno
+%option yylineno
 
 %%
 \n { yylineno++; yycolumn = 1; }
@@ -83,7 +83,7 @@ lexCopy code%option yylineno
 **Örnek:**
 
 ```
-cCopy codeextern FILE *yyin;
+extern FILE *yyin;
 
 int main(int argc, char *argv[]) {
     if (argc > 1) {
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 **Örnek:**
 
 ```
-cCopy codeextern FILE *yyout;
+extern FILE *yyout;
 
 int main(void) {
     yyout = fopen("output.txt", "w");
@@ -126,7 +126,7 @@ int main(void) {
 **Örnek:**
 
 ```
-lexCopy code%option noyywrap
+%option noyywrap
 
 %%
 /* Lexer kuralları */
@@ -146,7 +146,7 @@ int yywrap(void) {
 **Örnek:**
 
 ```
-cCopy code#include <FlexLexer.h>
+#include <FlexLexer.h>
 
 int main(void) {
     YY_BUFFER_STATE buffer = yy_scan_string("3 + 4 * 5");
@@ -165,7 +165,7 @@ int main(void) {
 **Örnek:**
 
 ```
-cCopy codeYY_BUFFER_STATE buffer = yy_scan_string("...");
+YY_BUFFER_STATE buffer = yy_scan_string("...");
 // ...
 yy_delete_buffer(buffer);
 ```
@@ -179,10 +179,6 @@ yy_delete_buffer(buffer);
 **Örnek:**
 
 ```
-c
-
-
-Copy code
 YY_FLUSH_BUFFER;
 ```
 
@@ -195,7 +191,7 @@ YY_FLUSH_BUFFER;
 **Örnek:**
 
 ```
-cCopy codeint line = yyget_lineno();
+int line = yyget_lineno();
 yyset_lineno(line + 1);
 ```
 
@@ -208,7 +204,7 @@ yyset_lineno(line + 1);
 **Örnek:**
 
 ```
-cCopy codechar *text = yyget_text();
+char * text = yyget_text();
 int length = yyget_leng();
 ```
 
@@ -227,7 +223,7 @@ Bison, tanımladığınız dilbilgisine göre bir parser (ayrıştırıcı) olu�
 **Örnek:**
 
 ```
-cCopy codeint main(void) {
+int main(void) {
     if (yyparse() == 0) {
         printf("Parse başarılı!\n");
     } else {
@@ -248,7 +244,7 @@ cCopy codeint main(void) {
 Lexer'da:
 
 ```
-lexCopy code[0-9]+ {
+[0-9]+ {
     yylval.intval = atoi(yytext);
     return INTEGER;
 }
@@ -257,7 +253,7 @@ lexCopy code[0-9]+ {
 Bison'da:
 
 ```
-yaccCopy code%union {
+%union {
     int intval;
     /* Diğer tipler */
 }
@@ -274,7 +270,7 @@ yaccCopy code%union {
 **Örnek:**
 
 ```
-cCopy codevoid yyerror(const char *s) {
+void yyerror(const char *s) {
     extern int yylineno;
     fprintf(stderr, "Hata: %s satır %d\n", s, yylineno);
 }
@@ -297,7 +293,7 @@ cCopy codevoid yyerror(const char *s) {
 **Örnek:**
 
 ```
-yaccCopy codeexpr: expr '+' expr {
+expr: expr '+' expr {
     $$ = $1 + $3;
 }
 ```
@@ -314,7 +310,7 @@ yaccCopy codeexpr: expr '+' expr {
 **Örnek:**
 
 ```
-yaccCopy code%define parse.error detailed
+%define parse.error detailed
 %locations
 
 expr: expr '+' expr {
@@ -334,7 +330,7 @@ expr: expr '+' expr {
 **Örnek:**
 
 ```
-yaccCopy codeif_stmt: IF expr THEN stmt {
+if_stmt: IF expr THEN stmt {
     if (!is_boolean($2)) {
         yyerror("IF ifadesinde boolean bekleniyor");
         YYERROR;
@@ -351,7 +347,7 @@ yaccCopy codeif_stmt: IF expr THEN stmt {
 **Örnek:**
 
 ```
-cCopy codeif (yynerrs > 0) {
+if (yynerrs > 0) {
     fprintf(stderr, "Toplam %d hata bulundu.\n", yynerrs);
 }
 ```
@@ -365,7 +361,7 @@ cCopy codeif (yynerrs > 0) {
 **Örnek:**
 
 ```
-yaccCopy codeif (yychar == YYEOF) {
+if (yychar == YYEOF) {
     printf("Dosyanın sonuna ulaşıldı.\n");
 }
 ```
@@ -381,7 +377,7 @@ yaccCopy codeif (yychar == YYEOF) {
 **Örnek:**
 
 ```
-yaccCopy code%token PLUS MINUS TIMES DIVIDE
+%token PLUS MINUS TIMES DIVIDE
 %left PLUS MINUS
 %left TIMES DIVIDE
 ```
@@ -395,7 +391,7 @@ yaccCopy code%token PLUS MINUS TIMES DIVIDE
 **Örnek:**
 
 ```
-yaccCopy code%union {
+%union {
     int intval;
     float floatval;
     char *strval;
@@ -411,10 +407,6 @@ yaccCopy code%union {
 **Örnek:**
 
 ```
-yacc
-
-
-Copy code
 %type <intval> expr term factor
 ```
 
@@ -427,10 +419,6 @@ Copy code
 **Örnek:**
 
 ```
-yacc
-
-
-Copy code
 %start program
 ```
 
@@ -443,7 +431,7 @@ Copy code
 **Örnek:**
 
 ```
-yaccCopy code%define parse.error verbose
+%define parse.error verbose
 
 %code requires {
     /* Header kodları */

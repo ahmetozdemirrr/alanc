@@ -25,18 +25,12 @@
 /*regular expressions*/
 
 COMMENT         [#].*
-INTEGER         [-]?[0-9]+
-FLOAT           [-]?[0-9]+[.][0-9]+
+INTEGER         [0-9]+
+FLOAT           [0-9]+[.][0-9]+
 IDENTIFIER      [a-zA-Z][a-zA-Z0-9_]{0,31} 
 WHITESPACE      [ \t]+
 SIGN            [^*+-/()= \n\t{}[].,<>;] 
 POINTER         "->"
-
-/*
-    TO DO: 
-    INTEGER ve FLOAT tanımlarında baştaki opsiyonel 
-    '-' operatörü sorun yaratıyor binary işlemlerde
-*/
 
 /* KEYWORD, OPERATOR and other tokens */
 
@@ -154,8 +148,6 @@ return          {
                     yycolumn += yyleng; 
                     return KW_RETURN;       
                 }
-{COMMENT}       { /* return COMMENT; */   }
-
 \n              {
                     yycolumn += yyleng; 
                     yycolumn = 1;
@@ -191,20 +183,19 @@ null            {
                     yylval.floatval = atof(yytext); 
                     return FLOAT;     
                 }
-{WHITESPACE}    { yycolumn += yyleng; }
+{WHITESPACE}    { yycolumn += yyleng;   }
+{COMMENT}       { /* return COMMENT; */ }
 
 {SIGN}+[a-zA-Z0-9]+         { 
                                 /* give syntax error if identifiers are preceded by a SIGN */
                                 fprintf(stderr, "SYNTAX ERROR '%s' cannot be tokenized\n",yytext); 
                                 exit(EXIT_FAILURE);
                             }  
-
 {SIGN}+[a-zA-Z0-9]+{SIGN}+  { 
                                 /* give syntax error if identifiers are contain a SIGN */
                                 fprintf(stderr, "SYNTAX ERROR '%s' cannot be tokenized\n",yytext); 
                                 exit(EXIT_FAILURE);
                             }  
-
 .                           {    
                                 /* Any other overlap errors */
                                 fprintf(stderr, "Unrecognized character: '%s'\n", yytext);

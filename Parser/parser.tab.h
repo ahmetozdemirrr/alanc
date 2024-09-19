@@ -89,7 +89,8 @@ extern int yydebug;
     OP_OPEN_ANGLE = 290,           /* OP_OPEN_ANGLE  */
     OP_CLOSE_ANGLE = 291,          /* OP_CLOSE_ANGLE  */
     OP_SEMICOLON = 292,            /* OP_SEMICOLON  */
-    POINTER = 293                  /* POINTER  */
+    POINTER = 293,                 /* POINTER  */
+    UNARY_MINUS = 294              /* UNARY_MINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -106,7 +107,7 @@ union YYSTYPE
     int    boolean;     /* for Boolean types (0 or 1) */
     void * nullval;     /* for Null                   */
 
-#line 110 "Parser/parser.tab.h"
+#line 111 "Parser/parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
