@@ -31,10 +31,8 @@ Variable;
 Variable create_int_var(int value);
 Variable create_float_var(float value);
 Variable create_bool_var(int value);
-
-/* 
-Variable create_string_var(const char * value);
- */
+Variable create_str_var(const char * value);
+void destroy_variable(Variable * var);
 
 #endif /* VARIABLES_H */
 

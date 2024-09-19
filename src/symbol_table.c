@@ -69,6 +69,7 @@ void free_symbol_table(SymbolTable * table)
         SymbolTable * temp = table;
         table = table->next;
         free(temp->name);
+        destroy_variable(&temp->value); /* Değişkeni serbest bırak */
         free(temp);
     }
 }
