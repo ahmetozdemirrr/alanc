@@ -8,22 +8,22 @@ Now let's look at the tokens already used in the A language.
 
 ### Operators:
 
-* [+] -> OP_PLUS: for arithmetic adding operation
-* [-]  -> OP_MINUS: for arithmetic substract and negative operation
-* [*] -> OP_MULT: for arithmetic multiplication operation
-* [/] -> OP_DIV: for arithmetiz division operation
-* [(] -> OP_OPEN_P
-* [)] -> OP_CLOSE_P
-* [=] -> OP_EQUAL: for assignment statements
-* [.] -> OP_DOT: non-functional for now
-* [,] -> OP_COMMA: separator atom in function, procedure and array definitions
-* [{] -> OP_OPEN_CURLY: body start seperator 
-* [}] -> OP_CLOSE_CURLY: body end seperator
-* [[] -> OP_OPEN_SQU: for array definitions
-* []] -> OP_CLOSE_SQU
-* [<] -> OP_OPEN_ANGLE: for logical operations
-* [>] -> OP_CLOSE_ANGLE
-* [;] -> OP_SEMICOLON: end-of-line token (mandatory for each line -C like-)
+* [+] -> OP\_PLUS: for arithmetic adding operation
+* [-]  -> OP\_MINUS: for arithmetic substract and negative operation
+* [\*] -> OP\_MULT: for arithmetic multiplication operation
+* [/] -> OP\_DIV: for arithmetiz division operation
+* [(] -> OP\_OPEN\_P
+* [)] -> OP\_CLOSE\_P
+* [=] -> OP\_EQUAL: for assignment statements
+* [.] -> OP\_DOT: non-functional for now
+* [,] -> OP\_COMMA: separator atom in function, procedure and array definitions
+* [{] -> OP\_OPEN\_CURLY: body start seperator 
+* [}] -> OP\_CLOSE\_CURLY: body end seperator
+* [[] -> OP\_OPEN\_SQU: for array definitions
+* []] -> OP\_CLOSE\_SQU
+* [<] -> OP\_OPEN\_ANGLE: for logical operations
+* [>] -> OP\_CLOSE\_ANGLE
+* [;] -> OP\_SEMICOLON: end-of-line token (mandatory for each line -C like-)
 * [->] -> POINTER: address assigner (for ex. a -> b; (now b holds the address of a))
 
 
