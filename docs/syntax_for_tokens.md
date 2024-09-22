@@ -79,6 +79,26 @@ There are currently three literals in our language: variable names, float number
 - Float numbers can also be classically defined with a point in the middle.
 
 
+### Operator Precedences:
+
+
+The precedence relationship between operators is described by a table called "operator precedence table". This table consists of rows. Each row is labeled "left to right" or "right to left". Operators in the top row of the table have higher priority than operators in the bottom row. Operators in the same row are treated as "left to right or right to left priority" according to their position in the expression (not in the table).  The following is a simple form of the precedence table: 
+    - `(``)` left to right 
+    - `*` `/` left to right 
+    - `+` `-` left to right 
+    - `=` right to left 
+
+The () operator in this table represents the function call operator and the precedence brackets. 
+
+So for example: a = b - c * d + e has a total of four operators. 
+
+The operations will be done in the following order: 
+
+    - I1: c * d 
+    - I2: b - I1 
+    - I3: I2 + e 
+    - I4: a = I3
+
 
 Sample Code for `ALan`:
 

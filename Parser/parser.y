@@ -3,6 +3,7 @@
     #include <string.h>
     #include <stdlib.h>
     #include "../include/utils.h"
+    #include "../include/logical.h"
     #include "../include/variables.h"
     #include "../include/symbol_table.h"
     
@@ -39,6 +40,7 @@
 %token OP_OPEN_P OP_CLOSE_P OP_OPEN_CURLY OP_CLOSE_CURLY
 %token OP_OPEN_SQU OP_CLOSE_SQU OP_COMMA OP_DOT OP_QUOTA
 %token OP_OPEN_ANGLE OP_CLOSE_ANGLE OP_SEMICOLON POINTER
+%token OP_AND OP_OR OP_NOT OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ
 
 %start PROGRAM
 %type <intval>   INT_EXP
@@ -47,6 +49,10 @@
 %type <string>   STRING_EXP
 %type <var>      EXPRESSION
 
+%left OP_OR 
+%left OP_AND
+%right OP_NOT
+%left OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ OP_OPEN_ANGLE OP_CLOSE_ANGLE
 %left OP_PLUS OP_MINUS   /* Toplama ve çıkarma operatörleri için sol bağlayıcılık */
 %left OP_MULT OP_DIV     /* Çarpma ve bölme operatörleri için sol bağlayıcılık    */
 %right UNARY_MINUS
@@ -105,7 +111,7 @@
         |   FLOAT_EXP                       { $$ = create_float_var($1); } /* FLOAT, as FLOAT_EXP   */
         |   BOOL_EXP                        { $$ = create_bool_var($1);  } /* BOOLEAN, as BOOL_EXP  */
         |   STRING_EXP                      { $$ = create_str_var($1);   } /* STRING, as STRING_EXP */
-        |   OP_OPEN_P EXPRESSION OP_CLOSE_P { $$ = $2;      }   
+        |   OP_OPEN_P EXPRESSION OP_CLOSE_P { $$ = $2; }   
         |   EXPRESSION OP_PLUS EXPRESSION   {
                                                 if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
                                                 {
@@ -194,23 +200,99 @@
             Using %prec, we can resolve this ambiguity by assigning a 
             special precedence to the unary minus operator.
         -----------------------------------------------------------------*/
-        | OP_MINUS EXPRESSION %prec UNARY_MINUS {
-                                                    if ($2.type == INT_TYPE) 
-                                                    {
-                                                        $$ = create_int_var(-$2.value.intval);
-                                                    } 
+        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   {
+                                                        if ($2.type == INT_TYPE) 
+                                                        {
+                                                            $$ = create_int_var(-$2.value.intval);
+                                                        } 
 
-                                                    else if ($2.type == FLOAT_TYPE) 
-                                                    {
-                                                        $$ = create_float_var(-$2.value.floatval);
-                                                    } 
+                                                        else if ($2.type == FLOAT_TYPE) 
+                                                        {
+                                                            $$ = create_float_var(-$2.value.floatval);
+                                                        } 
 
-                                                    else 
-                                                    {
-                                                        yyerror("Unary minus can only be applied to numbers.");
-                                                        YYERROR;
-                                                    } 
-                                                }
+                                                        else 
+                                                        {
+                                                            yyerror("Unary minus can only be applied to numbers.");
+                                                            YYERROR;
+                                                        } 
+                                                    }
+        /*
+            TO DO and some notes:
+
+            - What action should we take if there is a type difference between 
+              operands in comparison and relational operators? 
+            
+            For example:
+                
+                bool val1 = 4.5 < 5;
+                
+            - Should and, or and not only accept booleans?
+            - Implement CFG for sequentially strung comparison operators, e.g:
+                
+                bool val2 = 4 < 5 < 6;
+                
+                Here is the logic that I think should happen here: 
+                
+                ex1 = 4 < 5;
+                ex2 = 5 < 6;
+                ex3 = ex1 and ex2;
+        */
+
+        |   EXPRESSION OP_OPEN_ANGLE EXPRESSION     {
+                                                        $$ = create_bool_var(less_than($1, $3));
+                                                    }
+        |   EXPRESSION OP_CLOSE_ANGLE EXPRESSION    {
+                                                        $$ = create_bool_var(greater_than($1, $3));
+                                                    }
+        |   EXPRESSION OP_EQ_LESS EXPRESSION        {
+                                                        $$ = create_bool_var(less_equal($1, $3));
+                                                    }
+        |   EXPRESSION OP_EQ_GRE EXPRESSION         {
+                                                        $$ = create_bool_var(greater_equal($1, $3));
+                                                    }
+        |   EXPRESSION OP_IS_EQ EXPRESSION          {
+                                                        $$ = create_bool_var(equal($1, $3));
+                                                    }
+        |   EXPRESSION OP_ISNT_EQ EXPRESSION        {
+                                                        $$ = create_bool_var(not_equal($1, $3));
+                                                    }
+        |   EXPRESSION OP_AND EXPRESSION            {
+                                                        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) 
+                                                        {
+                                                            $$ = create_bool_var($1.value.boolval && $3.value.boolval);
+                                                        } 
+
+                                                        else 
+                                                        {
+                                                            yyerror("Type mismatch: 'and' operator requires boolean operands.");
+                                                            YYERROR;
+                                                        }
+                                                    }
+        |   EXPRESSION OP_OR EXPRESSION             {
+                                                        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) 
+                                                        {
+                                                            $$ = create_bool_var($1.value.boolval || $3.value.boolval);
+                                                        } 
+
+                                                        else
+                                                        {
+                                                            yyerror("Type mismatch: 'or' operator requires boolean operands.");
+                                                            YYERROR;
+                                                        }                                                    
+                                                    }
+        |   OP_NOT EXPRESSION                       {
+                                                        if ($2.type == BOOL_TYPE) 
+                                                        {
+                                                            $$ = create_bool_var(!($2.value.boolval));
+                                                        } 
+
+                                                        else 
+                                                        {
+                                                            yyerror("Type mismatch: 'not' operator requires a boolean operand.");
+                                                            YYERROR;
+                                                        }
+                                                    }                                                                                                                                                                                                
         ;
 
     INT_EXP:
@@ -218,7 +300,7 @@
         ;
 
     BOOL_EXP:
-            KW_TRUE { $$ = $1; }  /* true  -> 1, lexer'den gelen değer kullanılır */
+            KW_TRUE  { $$ = $1; }  /* true  -> 1, lexer'den gelen değer kullanılır */
         |   KW_FALSE { $$ = $1; }  /* false -> 0, lexer'den gelen değer kullanılır */
         ;
 

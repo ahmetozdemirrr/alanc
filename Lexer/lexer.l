@@ -98,6 +98,10 @@ POINTER            "->"
                         yycolumn += yyleng; 
                         return OP_CLOSE_SQU;    
                     }
+[;]                 {
+                        yycolumn += yyleng; 
+                        return OP_SEMICOLON;    
+                    } 
 [<]                 {
                         yycolumn += yyleng; 
                         return OP_OPEN_ANGLE;   
@@ -106,10 +110,34 @@ POINTER            "->"
                         yycolumn += yyleng; 
                         return OP_CLOSE_ANGLE;  
                     }
-[;]                 {
+"<="                {
                         yycolumn += yyleng; 
-                        return OP_SEMICOLON;    
-                    }            
+                        return OP_EQ_LESS;   
+                    }
+">="                {
+                        yycolumn += yyleng; 
+                        return OP_EQ_GRE;  
+                    }
+"=="                {
+                        yycolumn += yyleng; 
+                        return OP_IS_EQ;   
+                    }
+"!="                {
+                        yycolumn += yyleng; 
+                        return OP_ISNT_EQ;  
+                    }
+and                 {
+                        yycolumn += yyleng; 
+                        return OP_AND;    
+                    }
+or                  {
+                        yycolumn += yyleng; 
+                        return OP_OR;    
+                    }
+not                 {
+                        yycolumn += yyleng; 
+                        return OP_NOT;    
+                    }                                    
 if                  {
                         yycolumn += yyleng; 
                         return KW_IF;           

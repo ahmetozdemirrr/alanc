@@ -28,8 +28,8 @@ $(PARSER_OUTPUT): $(PARSER)
 	$(YACC) -d -o $(PARSER_OUTPUT) $(PARSER)
 
 # Compile all source files
-$(EXEC): $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) src/symbol_table.c src/variables.c src/utils.c
-	$(CC) $(LEX_OUTPUT) $(PARSER_OUTPUT) src/symbol_table.c src/variables.c src/utils.c -o $(EXEC) $(CFLAGS) $(LIBS)
+$(EXEC): $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) src/symbol_table.c src/variables.c src/utils.c src/logical.c
+	$(CC) $(LEX_OUTPUT) $(PARSER_OUTPUT) src/symbol_table.c src/variables.c src/utils.c src/logical.c -o $(EXEC) $(CFLAGS) $(LIBS)
 
 # Run the parser with test file
 test: $(EXEC)
