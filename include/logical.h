@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "variables.h"
+#include "utils.h"
 
 int equal(Variable a, Variable b);
 int not_equal(Variable a, Variable b);

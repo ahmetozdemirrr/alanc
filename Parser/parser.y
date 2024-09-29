@@ -36,11 +36,13 @@
 %token <string> STRING_LITERAL
 %token <string> IDENTIFIER
 %token <string> COMMENT
-%token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_EQUAL NEWLINE
-%token OP_OPEN_P OP_CLOSE_P OP_OPEN_CURLY OP_CLOSE_CURLY
-%token OP_OPEN_SQU OP_CLOSE_SQU OP_COMMA OP_DOT OP_QUOTA
+%token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_ASSIGNMENT NEWLINE OP_EXPO
+%token OP_OPEN_P OP_CLOSE_P OP_OPEN_CURLY OP_CLOSE_CURLY OP_MOD
+%token OP_OPEN_SQU OP_CLOSE_SQU OP_COMMA OP_DOT OP_QUOTA OP_POW
 %token OP_OPEN_ANGLE OP_CLOSE_ANGLE OP_SEMICOLON POINTER
 %token OP_AND OP_OR OP_NOT OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ
+%token OP_AUG_PLUS OP_AUG_MINUS OP_AUG_MULT OP_AUG_DIV OP_AUG_MOD
+
 
 %start PROGRAM
 %type <intval>   INT_EXP
@@ -48,14 +50,19 @@
 %type <floatval> FLOAT_EXP
 %type <string>   STRING_EXP
 %type <var>      EXPRESSION
+%type <var>      STATEMENT
 
-%left OP_OR 
-%left OP_AND
+%right OP_ASSIGNMENT
+%right OP_AUG_PLUS OP_AUG_MINUS
+%right OP_AUG_MULT OP_AUG_DIV OP_AUG_MOD
+%left  OP_OR 
+%left  OP_AND
 %right OP_NOT
-%left OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ OP_OPEN_ANGLE OP_CLOSE_ANGLE
-%left OP_PLUS OP_MINUS   /* Toplama ve çıkarma operatörleri için sol bağlayıcılık */
-%left OP_MULT OP_DIV     /* Çarpma ve bölme operatörleri için sol bağlayıcılık    */
+%left  OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ OP_OPEN_ANGLE OP_CLOSE_ANGLE
+%left  OP_PLUS OP_MINUS   /* Toplama ve çıkarma operatörleri için sol bağlayıcılık */
+%left  OP_MULT OP_DIV OP_MOD /* Çarpma ve bölme operatörleri için sol bağlayıcılık    */
 %right UNARY_MINUS
+%right OP_POW
 
 %%
     PROGRAM:
@@ -99,11 +106,15 @@
                 - type mismatch control
             */
 
-        |   KW_INT   IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_int_var($4.value.intval));     }
-        |   KW_FLOAT IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_float_var($4.value.floatval)); }
-        |   KW_BOOL  IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_bool_var($4.value.boolval));   }
-        |   KW_STR   IDENTIFIER OP_EQUAL EXPRESSION OP_SEMICOLON    { set_var(symbol_table, $2, create_str_var($4.value.strval));     }
-        |   OP_SEMICOLON 
+        |   KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_int_var($4.value.intval));     }
+        |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_float_var($4.value.floatval)); }
+        |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_bool_var($4.value.boolval));   }
+        |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_str_var($4.value.strval));     }
+        |   OP_SEMICOLON    { 
+                                Variable null_var;
+                                null_var.type = NULL_TYPE;
+                                $$ = null_var;
+                            }
         ;
 
     EXPRESSION:
@@ -194,24 +205,203 @@
                                                     YYERROR;
                                                 }
                                             }
+        |   EXPRESSION OP_MOD   EXPRESSION  {
+                                                if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+                                                    
+                                                    if ($3.value.intval == 0) {
+                                                        yyerror("Division by zero in modulus operation.");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else {
+                                                        $$ = create_int_var($1.value.intval % $3.value.intval);
+                                                    }
+                                                } 
+
+                                                else if ($1.type == FLOAT_TYPE || $3.type == FLOAT_TYPE) {
+                                                    yyerror("Modulus operator is not supported for float types.");
+                                                    YYERROR;
+                                                } 
+
+                                                else {
+                                                    yyerror("Type mismatch: Modulus requires integer operands.");
+                                                    YYERROR;
+                                                }
+                                            }
+        |   EXPRESSION OP_POW   EXPRESSION  {
+                                                if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                {
+                                                    $$ = create_float_var(pow($1.value.intval, $3.value.intval));
+                                                }
+
+                                                else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
+                                                {
+                                                    $$ = create_float_var(pow($1.value.floatval, $3.value.floatval));
+                                                }
+
+                                                else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                {
+                                                    $$ = create_float_var(pow((float) $1.value.intval, $3.value.floatval));
+                                                }
+
+                                                else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                {
+                                                    $$ = create_float_var(pow($1.value.floatval, (float) $3.value.intval));
+                                                }
+
+                                                else 
+                                                {
+                                                    yyerror("Type mismatch: Unsupported types for power operator.");
+                                                    YYERROR;
+                                                }
+                                            }
+
+        /*-------------------------------------------------
+            SYNOPSIS for Augmented Arithmetic Operators:
+
+            expr1 _augmented_op_ expr2; 
+            will be evaluated as
+            expr1 = expr1 _op_ expr2;
+            (a += b;) --> (a = a + b;)
+        -------------------------------------------------*/
+
+        |   EXPRESSION OP_AUG_PLUS  EXPRESSION  {
+                                                    if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.intval += $3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        $1.value.floatval += $3.value.floatval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == STRING_TYPE && $3.type == STRING_TYPE) 
+                                                    {
+                                                        char * concat = malloc(strlen($1.value.strval) + strlen($3.value.strval) + 1);
+                                                        strcpy(concat, $1.value.strval);
+                                                        strcat(concat, $3.value.strval);
+                                                        free($1.value.strval);
+                                                        $1.value.strval = concat;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        yyerror("Type mismatch: incompatible types for '+='.");
+                                                        YYERROR;
+                                                    }
+                                                }
+        |   EXPRESSION OP_AUG_MINUS EXPRESSION  {
+                                                    if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.intval -= $3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        $1.value.floatval -= $3.value.floatval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        yyerror("Type mismatch: incompatible types for '-='.");
+                                                        YYERROR;
+                                                    }
+                                                }
+        |   EXPRESSION OP_AUG_MULT  EXPRESSION  {
+                                                    if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.intval *= $3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        $1.value.floatval *= $3.value.floatval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        yyerror("Type mismatch: incompatible types for '*='.");
+                                                        YYERROR;
+                                                    }
+                                                }
+        |   EXPRESSION OP_AUG_DIV   EXPRESSION  {
+                                                    if ($3.type == INT_TYPE && $3.value.intval == 0) 
+                                                    {
+                                                        yyerror("Division by zero.");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else if ($3.type == FLOAT_TYPE && $3.value.floatval == 0.0) 
+                                                    {
+                                                        yyerror("Division by zero.");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.intval /= $3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        $1.value.floatval /= $3.value.floatval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        yyerror("Type mismatch: incompatible types for '/='.");
+                                                        YYERROR;
+                                                    }
+                                                }
+        |   EXPRESSION OP_AUG_MOD   EXPRESSION  {
+                                                    if ($3.type == INT_TYPE && $3.value.intval == 0) 
+                                                    {
+                                                        yyerror("Division by zero.");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.intval %= $3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        yyerror("Type mismatch: incompatible types for '%='.");
+                                                        YYERROR;
+                                                    }
+                                                }
+
         /*-----------------------------------------------------------------
             When we define both unary and binary - operators, Bison may
             experience ambiguity due to the different uses of this symbol.
             Using %prec, we can resolve this ambiguity by assigning a 
             special precedence to the unary minus operator.
         -----------------------------------------------------------------*/
+
         |   OP_MINUS EXPRESSION %prec UNARY_MINUS   {
-                                                        if ($2.type == INT_TYPE) 
+                                                        if ($2.type == INT_TYPE)
                                                         {
                                                             $$ = create_int_var(-$2.value.intval);
                                                         } 
 
-                                                        else if ($2.type == FLOAT_TYPE) 
+                                                        else if ($2.type == FLOAT_TYPE)
                                                         {
                                                             $$ = create_float_var(-$2.value.floatval);
                                                         } 
 
-                                                        else 
+                                                        else
                                                         {
                                                             yyerror("Unary minus can only be applied to numbers.");
                                                             YYERROR;
@@ -239,38 +429,38 @@
                 ex3 = ex1 and ex2;
         */
 
-        |   EXPRESSION OP_OPEN_ANGLE EXPRESSION     {
+        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  {
                                                         $$ = create_bool_var(less_than($1, $3));
                                                     }
-        |   EXPRESSION OP_CLOSE_ANGLE EXPRESSION    {
+        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  {
                                                         $$ = create_bool_var(greater_than($1, $3));
                                                     }
-        |   EXPRESSION OP_EQ_LESS EXPRESSION        {
+        |   EXPRESSION OP_EQ_LESS       EXPRESSION  {
                                                         $$ = create_bool_var(less_equal($1, $3));
                                                     }
-        |   EXPRESSION OP_EQ_GRE EXPRESSION         {
+        |   EXPRESSION OP_EQ_GRE        EXPRESSION  {
                                                         $$ = create_bool_var(greater_equal($1, $3));
                                                     }
-        |   EXPRESSION OP_IS_EQ EXPRESSION          {
+        |   EXPRESSION OP_IS_EQ         EXPRESSION  {
                                                         $$ = create_bool_var(equal($1, $3));
                                                     }
-        |   EXPRESSION OP_ISNT_EQ EXPRESSION        {
+        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  {
                                                         $$ = create_bool_var(not_equal($1, $3));
                                                     }
-        |   EXPRESSION OP_AND EXPRESSION            {
-                                                        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) 
+        |   EXPRESSION OP_AND           EXPRESSION  {
+                                                        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE)
                                                         {
                                                             $$ = create_bool_var($1.value.boolval && $3.value.boolval);
                                                         } 
 
-                                                        else 
+                                                        else
                                                         {
                                                             yyerror("Type mismatch: 'and' operator requires boolean operands.");
                                                             YYERROR;
                                                         }
                                                     }
-        |   EXPRESSION OP_OR EXPRESSION             {
-                                                        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) 
+        |   EXPRESSION OP_OR            EXPRESSION  {
+                                                        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE)
                                                         {
                                                             $$ = create_bool_var($1.value.boolval || $3.value.boolval);
                                                         } 
@@ -281,18 +471,31 @@
                                                             YYERROR;
                                                         }                                                    
                                                     }
-        |   OP_NOT EXPRESSION                       {
-                                                        if ($2.type == BOOL_TYPE) 
+        |   OP_NOT                      EXPRESSION  {
+                                                        if ($2.type == BOOL_TYPE)
                                                         {
                                                             $$ = create_bool_var(!($2.value.boolval));
                                                         } 
 
-                                                        else 
+                                                        else
                                                         {
                                                             yyerror("Type mismatch: 'not' operator requires a boolean operand.");
                                                             YYERROR;
                                                         }
-                                                    }                                                                                                                                                                                                
+                                                    }
+
+        /*-------------------------------------------------------------------------------
+            TO DO:
+
+            Add CFG rules and necessary functions for sequential comparison operators.
+
+            For example:
+
+            a > b < c;
+            
+            must be evaluated as:
+            (a > b) and (b < c);
+        -------------------------------------------------------------------------------*/                                                                                                                                                                                                
         ;
 
     INT_EXP:
@@ -316,7 +519,7 @@
 int main(int argc, char * argv[])
 {
     /* yydebug = 0;   inactivating debugging */
-    yydebug = 0;     /* activating debugging */
+    yydebug = 1;     /* activating debugging */
 
     symbol_table = create_symbol_table();
 
@@ -351,7 +554,6 @@ int main(int argc, char * argv[])
         printf("Usage: ./parser or ./parser <filename>\n");
         return 0;
     }
-
     return 0;
 }
 
@@ -391,7 +593,7 @@ from ../Parser/parser.tab.h tokens index:
     OP_MINUS = 278,       
     OP_MULT = 279,        
     OP_DIV = 280,         
-    OP_EQUAL = 281,       
+    OP_ASSIGNMENT = 281,       
     NEWLINE = 282,        
     OP_OPEN_P = 283,      
     OP_CLOSE_P = 284,     

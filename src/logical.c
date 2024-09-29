@@ -41,8 +41,7 @@ int less_than(Variable a, Variable b)
         case BOOL_TYPE:
             return a.value.boolval < b.value.boolval;
         default:
-            fprintf(stderr, "Unsupported type in equality comparison.\n");
-            exit(EXIT_FAILURE);
+            yyerror("Unsupported type in equality comparison.\n");
     }
 }
 
@@ -66,8 +65,7 @@ int greater_than(Variable a, Variable b)
         case BOOL_TYPE:
             return a.value.boolval > b.value.boolval;
         default:
-            fprintf(stderr, "Unsupported type in equality comparison.\n");
-            exit(EXIT_FAILURE);
+            yyerror("Unsupported type in equality comparison.\n");
     }
 }
 
@@ -76,11 +74,32 @@ int greater_equal(Variable a, Variable b)
     return greater_than(a, b) || equal(a, b);
 }
 
+
+/*-------------------------------------------------------
+    TO DO:
+    _______________________________________________
+    What is required here is to identify types that
+    cannot be processed in relation to each other 
+    and return an appropriate response. 
+    _______________________________________________
+
+    For Example:
+
+    4 > true;
+    should also be considered valid. Because 'true' 
+    is actually held as 1. However
+
+    “number” > 3; 
+    should not be considered valid.
+    |
+    |
+    v
+-------------------------------------------------------*/
+
 void type_control(Variable a, Variable b)
 {
 	if (a.type != b.type) 
     {
-        fprintf(stderr, "Type mismatch in equality comparison.\n");
-        exit(EXIT_FAILURE);
+        yyerror("Type mismatch in comparison.\n");
     }
 }

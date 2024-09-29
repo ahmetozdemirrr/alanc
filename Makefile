@@ -6,7 +6,9 @@ YACC = bison
 # CFLAGS = -Wall -pedantic-errors -std=gnu99
 CFLAGS += -D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE
 CFLAGS += -D_FILE_OFFSET_BITS=64 -Iinclude
+CFLAGS += -lm 
 LIBS = -lfl -lm
+YACCFLAGS += -Wcounterexamples
 
 # Variables
 LEXER = Lexer/lexer.l
@@ -25,7 +27,8 @@ $(LEX_OUTPUT): $(LEXER)
 	$(FLEX) -o $(LEX_OUTPUT) $(LEXER)
 
 $(PARSER_OUTPUT): $(PARSER)
-	$(YACC) -d -o $(PARSER_OUTPUT) $(PARSER)
+	# $(YACC) -d -o $(PARSER_OUTPUT) $(PARSER)
+	$(YACC) -d $(YACCFLAGS) -o $(PARSER_OUTPUT) $(PARSER)
 
 # Compile all source files
 $(EXEC): $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) src/symbol_table.c src/variables.c src/utils.c src/logical.c

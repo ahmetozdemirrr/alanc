@@ -34,6 +34,16 @@ WHITESPACE         [ \t]+
 SIGN               [^*+-/()= \n\t{}[].,<>;] 
 POINTER            "->"
 
+/*
+    TO DO:
+    ______
+
+    Edit SIGN regex to new operators or 
+    apply another logic...
+    ______    
+
+*/
+
 /* KEYWORD, OPERATOR and other tokens */
 
 %%
@@ -54,9 +64,17 @@ POINTER            "->"
                         yycolumn += yyleng; 
                         return OP_MULT;         
                     }
+"**"                {
+                        yycolumn += yyleng; 
+                        return OP_POW;   
+                    }
 [/]                 {
                         yycolumn += yyleng; 
                         return OP_DIV;          
+                    }
+[%]                 {
+                        yycolumn += yyleng; 
+                        return OP_MOD;          
                     }
 [(]                 {
                         yycolumn += yyleng; 
@@ -68,7 +86,7 @@ POINTER            "->"
                     }
 [=]                 {
                         yycolumn += yyleng; 
-                        return OP_EQUAL;        
+                        return OP_ASSIGNMENT;        
                     }
 "->"                {
                         yycolumn += yyleng; 
@@ -125,6 +143,26 @@ POINTER            "->"
 "!="                {
                         yycolumn += yyleng; 
                         return OP_ISNT_EQ;  
+                    }
+"+="                {
+                        yycolumn += yyleng; 
+                        return OP_AUG_PLUS;  
+                    }
+"-="                {
+                        yycolumn += yyleng; 
+                        return OP_AUG_MINUS;  
+                    }
+"*="                {
+                        yycolumn += yyleng; 
+                        return OP_AUG_MULT;  
+                    }
+"/="                {
+                        yycolumn += yyleng; 
+                        return OP_AUG_DIV;  
+                    }
+"%="                {
+                        yycolumn += yyleng; 
+                        return OP_AUG_MOD;  
                     }
 and                 {
                         yycolumn += yyleng; 
@@ -219,7 +257,9 @@ null                {
                     }
 {STRING_LITERAL}    {
                         yycolumn += yyleng;
-                        yylval.string = strdup(yytext);
+                        /* İlk ve son çift tırnağı kaldırarak sadece string içeriğini al */
+                        yylval.string = strdup(yytext + 1);  /* Başlangıçtaki tırnağı atla */
+                        yylval.string[strlen(yylval.string) - 1] = '\0';  /* Son tırnağı kaldır */
                         return STRING_LITERAL;
                     }
 {WHITESPACE}        { yycolumn += yyleng;   }
