@@ -7,47 +7,43 @@ SymbolTable * symbol_table = NULL;
 
 SymbolTable * create_symbol_table() 
 {
-    SymbolTable * table = (SymbolTable *)malloc(sizeof(SymbolTable));
-
-    if (table == NULL) 
-    {
-        printf("Memory allocation failed!\n");
-        exit(EXIT_FAILURE);
-    }
-    table->name = NULL;
-    table->next = NULL;
-
-    return table;
+    return NULL;
 }
 
-void set_var(SymbolTable * table, char * name, Variable value) 
+void set_var(SymbolTable ** table, char * name, Variable value) 
 {
-    if (table == NULL) 
+    if (*table == NULL) 
     {
-        printf("Error: Symbol table is not initialized.\n");
-        exit(EXIT_FAILURE);
-    }
+        *table = (SymbolTable *)malloc(sizeof(SymbolTable));
+        (*table)->name = strdup(name);
+        (*table)->value = value;
+        (*table)->next = NULL;
+    } 
 
-    SymbolTable * entry = table;
-
-    while (entry != NULL && entry->name != NULL) 
+    else 
     {
-        if (strcmp(entry->name, name) == 0) 
+        SymbolTable * entry = *table;
+
+        while (entry != NULL) 
         {
-            entry->value = value;
-            return;
+            if (strcmp(entry->name, name) == 0) 
+            {
+                char error_msg_buffer[100];
+                sprintf(error_msg_buffer, "Error: Variable '%s' is already defined.\n", name);
+                
+                yyerror(error_msg_buffer);
+            }
+            entry = entry->next;
         }
-        entry = entry->next;
+        SymbolTable *newEntry = (SymbolTable *)malloc(sizeof(SymbolTable));
+        newEntry->name = strdup(name);
+        newEntry->value = value;
+        newEntry->next = *table;
+        *table = newEntry;
     }
-    /* case of new variable */
-    SymbolTable * newEntry = (SymbolTable *)malloc(sizeof(SymbolTable));
-    newEntry->name  = strdup(name);    
-    newEntry->value = value;
-    newEntry->next  = table->next;
-    table->next     = newEntry;
-
-   /*  print_symbol_table(symbol_table);  */
+    // print_symbol_table(*table);
 }
+
 
 /*------------------------------------------------
     TO DO:

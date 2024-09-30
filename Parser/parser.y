@@ -109,10 +109,107 @@
                 - type mismatch control
             */
 
-        |   KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_int_var($4.value.intval));     }
-        |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_float_var($4.value.floatval)); }
-        |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_bool_var($4.value.boolval));   }
-        |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_str_var($4.value.strval));     }
+        |   KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { 
+                                                                            if ($4.type != INT_TYPE) 
+                                                                            {
+                                                                                yyerror("Type mismatch: Expected INT type\n");
+                                                                                YYERROR;
+                                                                            }
+
+                                                                            else
+                                                                            {
+                                                                                $$ = $4; 
+                                                                                set_var(&symbol_table, $2, create_int_var($4.value.intval));
+                                                                            }
+                                                                        }
+        |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { 
+                                                                            if ($4.type != FLOAT_TYPE)
+                                                                            {
+                                                                                yyerror("Type mismatch: Expected FLOAT type\n");
+                                                                                YYERROR;
+                                                                            }
+
+                                                                            else
+                                                                            {
+                                                                                $$ = $4; 
+                                                                                set_var(&symbol_table, $2, create_float_var($4.value.floatval)); 
+                                                                            }
+                                                                        }
+        |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   {
+                                                                            if ($4.type != BOOL_TYPE)
+                                                                            {
+                                                                                yyerror("Type mismatch: Expected BOOL type\n");
+                                                                                YYERROR;
+                                                                            }
+
+                                                                            else
+                                                                            {
+                                                                                $$ = $4; 
+                                                                                set_var(&symbol_table, $2, create_bool_var($4.value.boolval)); 
+                                                                            }  
+                                                                        }
+        |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   {
+                                                                            if ($4.type != STRING_TYPE)
+                                                                            {
+                                                                                yyerror("Type mismatch: Expected STR type\n");
+                                                                                YYERROR;
+                                                                            }
+
+                                                                            else 
+                                                                            {
+                                                                                $$ = $4; 
+                                                                                set_var(&symbol_table, $2, create_str_var($4.value.strval));  
+                                                                            }    
+                                                                        }
+        |   KW_INT   IDENTIFIER OP_SEMICOLON    { 
+                                                    if (get_var(symbol_table, $2) != NULL) 
+                                                    {
+                                                        yyerror("Variable already defined\n");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        set_var(&symbol_table, $2, create_int_var(0));     
+                                                    }
+                                                }
+        |   KW_FLOAT IDENTIFIER OP_SEMICOLON    {
+                                                    if (get_var(symbol_table, $2) != NULL) 
+                                                    {
+                                                        yyerror("Variable already defined\n");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else
+                                                    {
+                                                        set_var(&symbol_table, $2, create_float_var(0.0)); 
+                                                    }
+                                                }
+        |   KW_BOOL  IDENTIFIER OP_SEMICOLON    { 
+                                                    if (get_var(symbol_table, $2) != NULL) 
+                                                    {
+                                                        yyerror("Variable already defined\n");
+                                                        YYERROR;
+                                                    }
+
+                                                    else
+                                                    {
+                                                        set_var(&symbol_table, $2, create_bool_var(0));   
+                                                    } 
+                                                }
+        |   KW_STR   IDENTIFIER OP_SEMICOLON    { 
+                                                    if (get_var(symbol_table, $2) != NULL) 
+                                                    {
+                                                        yyerror("Variable already defined\n");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else
+                                                    {
+                                                        set_var(&symbol_table, $2, create_str_var(NULL));     
+                                                    }
+                                                }
+        
         // |   IF_STATEMENT    { $$ = $1; }
         |   OP_SEMICOLON    { 
                                 Variable null_var;
@@ -168,7 +265,7 @@
 
                                                 else 
                                                 {
-                                                    yyerror("Type mismatch: Not suitable types for '+' operator.");
+                                                    yyerror("Type mismatch: Not suitable types for '+' operator\n");
                                                     YYERROR;
                                                 }
                                             }
@@ -184,7 +281,7 @@
                                                 } 
 
                                                 else {
-                                                    yyerror("Type mismatch: Unsupported types for '*' operator.");
+                                                    yyerror("Type mismatch: Unsupported types for '*' operator\n");
                                                     YYERROR;
                                                 }  
                                             }
@@ -200,14 +297,14 @@
                                                 } 
 
                                                 else {
-                                                    yyerror("Type mismatch: Unsupported types for '*' operator.");
+                                                    yyerror("Type mismatch: Unsupported types for '*' operator\n");
                                                     YYERROR;
                                                 } 
                                             }
         |   EXPRESSION OP_DIV   EXPRESSION  {
                                                 if ($3.value.floatval == 0) 
                                                 {
-                                                    yyerror("Division by zero.");
+                                                    yyerror("Division by zero\n");
                                                     YYERROR;
                                                 } 
 
@@ -223,7 +320,7 @@
 
                                                 else 
                                                 {
-                                                    yyerror("Type mismatch: Unsupported types for '/' operator.");
+                                                    yyerror("Type mismatch: Unsupported types for '/' operator\n");
                                                     YYERROR;
                                                 }
                                             }
@@ -233,7 +330,7 @@
                                                     
                                                     if ($3.value.intval == 0) 
                                                     {
-                                                        yyerror("Division by zero in modulus operation.");
+                                                        yyerror("Division by zero in modulus operation\n");
                                                         YYERROR;
                                                     } 
 
@@ -245,13 +342,13 @@
 
                                                 else if ($1.type == FLOAT_TYPE || $3.type == FLOAT_TYPE) 
                                                 {
-                                                    yyerror("Modulus operator is not supported for float types.");
+                                                    yyerror("Modulus operator is not supported for float types\n");
                                                     YYERROR;
                                                 } 
 
                                                 else 
                                                 {
-                                                    yyerror("Type mismatch: Modulus requires integer operands.");
+                                                    yyerror("Type mismatch: Modulus requires integer operands\n");
                                                     YYERROR;
                                                 }
                                             }
@@ -278,11 +375,35 @@
 
                                                 else 
                                                 {
-                                                    yyerror("Type mismatch: Unsupported types for power operator.");
+                                                    yyerror("Type mismatch: Unsupported types for power operator\n");
                                                     YYERROR;
                                                 }
                                             }
 
+        |   IDENTIFIER OP_ASSIGNMENT EXPRESSION     {
+                                                        Variable * var = get_var(symbol_table, $1);
+
+                                                        if (var == NULL) 
+                                                        {
+                                                            yyerror("Variable not defined\n");
+                                                            YYERROR;
+                                                        } 
+
+                                                        else 
+                                                        {
+                                                            if (var->type == $3.type) 
+                                                            {
+                                                                *var = $3;
+                                                            } 
+
+                                                            else
+                                                            {
+                                                                yyerror("Type mismatch in assignment\n");
+                                                                YYERROR;
+                                                            }
+                                                        }
+                                                        
+                                                    }
         /*-------------------------------------------------
             SYNOPSIS for Augmented Arithmetic Operators:
 
@@ -317,7 +438,7 @@
 
                                                     else 
                                                     {
-                                                        yyerror("Type mismatch: incompatible types for '+='.");
+                                                        yyerror("Type mismatch: incompatible types for '+='\n");
                                                         YYERROR;
                                                     }
                                                 }
@@ -336,7 +457,7 @@
 
                                                     else 
                                                     {
-                                                        yyerror("Type mismatch: incompatible types for '-='.");
+                                                        yyerror("Type mismatch: incompatible types for '-='\n");
                                                         YYERROR;
                                                     }
                                                 }
@@ -355,20 +476,20 @@
 
                                                     else 
                                                     {
-                                                        yyerror("Type mismatch: incompatible types for '*='.");
+                                                        yyerror("Type mismatch: incompatible types for '*='\n");
                                                         YYERROR;
                                                     }
                                                 }
         |   EXPRESSION OP_AUG_DIV   EXPRESSION  {
                                                     if ($3.type == INT_TYPE && $3.value.intval == 0) 
                                                     {
-                                                        yyerror("Division by zero.");
+                                                        yyerror("Division by zero\n");
                                                         YYERROR;
                                                     } 
 
                                                     else if ($3.type == FLOAT_TYPE && $3.value.floatval == 0.0) 
                                                     {
-                                                        yyerror("Division by zero.");
+                                                        yyerror("Division by zero\n");
                                                         YYERROR;
                                                     } 
 
@@ -386,14 +507,14 @@
 
                                                     else 
                                                     {
-                                                        yyerror("Type mismatch: incompatible types for '/='.");
+                                                        yyerror("Type mismatch: incompatible types for '/='\n");
                                                         YYERROR;
                                                     }
                                                 }
         |   EXPRESSION OP_AUG_MOD   EXPRESSION  {
                                                     if ($3.type == INT_TYPE && $3.value.intval == 0) 
                                                     {
-                                                        yyerror("Division by zero.");
+                                                        yyerror("Division by zero\n");
                                                         YYERROR;
                                                     } 
 
@@ -405,7 +526,7 @@
 
                                                     else 
                                                     {
-                                                        yyerror("Type mismatch: incompatible types for '%='.");
+                                                        yyerror("Type mismatch: incompatible types for '%='\n");
                                                         YYERROR;
                                                     }
                                                 }
@@ -430,7 +551,7 @@
 
                                                         else
                                                         {
-                                                            yyerror("Unary minus can only be applied to numbers.");
+                                                            yyerror("Unary minus can only be applied to numbers\n");
                                                             YYERROR;
                                                         } 
                                                     }
@@ -482,7 +603,7 @@
 
                                                         else
                                                         {
-                                                            yyerror("Type mismatch: 'and' operator requires boolean operands.");
+                                                            yyerror("Type mismatch: 'and' operator requires boolean operands\n");
                                                             YYERROR;
                                                         }
                                                     }
@@ -494,7 +615,7 @@
 
                                                         else
                                                         {
-                                                            yyerror("Type mismatch: 'or' operator requires boolean operands.");
+                                                            yyerror("Type mismatch: 'or' operator requires boolean operands\n");
                                                             YYERROR;
                                                         }                                                    
                                                     }
@@ -506,7 +627,7 @@
 
                                                         else
                                                         {
-                                                            yyerror("Type mismatch: 'not' operator requires a boolean operand.");
+                                                            yyerror("Type mismatch: 'not' operator requires a boolean operand\n");
                                                             YYERROR;
                                                         }
                                                     }
