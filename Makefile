@@ -16,6 +16,7 @@ PARSER = Parser/parser.y
 LEX_OUTPUT = Lexer/lex.yy.c
 PARSER_OUTPUT = Parser/parser.tab.c
 PARSER_HEADER = Parser/parser.tab.h
+LEX_HEADER = Lexer/lex.yy.h
 EXEC = parser
 TEST_FILE = tests/test.alan
 
@@ -24,14 +25,14 @@ all: $(EXEC)
 
 # Generate lexer and parser files
 $(LEX_OUTPUT): $(LEXER)
-	$(FLEX) -o $(LEX_OUTPUT) $(LEXER)
+	$(FLEX) --header-file=$(LEX_HEADER) -o $(LEX_OUTPUT) $(LEXER)
 
 $(PARSER_OUTPUT): $(PARSER)
 	# $(YACC) -d -o $(PARSER_OUTPUT) $(PARSER)
 	$(YACC) -d $(YACCFLAGS) -o $(PARSER_OUTPUT) $(PARSER)
 
 # Compile all source files
-$(EXEC): $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) src/symbol_table.c src/variables.c src/utils.c src/logical.c
+$(EXEC): $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) $(LEX_HEADER) src/symbol_table.c src/variables.c src/utils.c src/logical.c
 	$(CC) $(LEX_OUTPUT) $(PARSER_OUTPUT) src/symbol_table.c src/variables.c src/utils.c src/logical.c -o $(EXEC) $(CFLAGS) $(LIBS)
 
 # Run the parser with test file
@@ -40,7 +41,7 @@ test: $(EXEC)
 
 # Clean generated files
 clean:
-	rm -f $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) Lexer/lex.yy.c Parser/parser.tab.* $(EXEC) *.o
+	rm -f $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) $(LEX_HEADER) Lexer/lex.yy.c Parser/parser.tab.* $(EXEC) *.o
 
 # Run parser
 run: $(EXEC)
