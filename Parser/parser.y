@@ -50,7 +50,9 @@
 %type <floatval> FLOAT_EXP
 %type <string>   STRING_EXP
 %type <var>      EXPRESSION
+// %type <var>      IF_STATEMENT
 %type <var>      STATEMENT
+// %type <var>      STATEMENTS
 
 %right OP_ASSIGNMENT
 %right OP_AUG_PLUS OP_AUG_MINUS
@@ -63,6 +65,7 @@
 %left  OP_MULT OP_DIV OP_MOD /* Çarpma ve bölme operatörleri için sol bağlayıcılık    */
 %right UNARY_MINUS
 %right OP_POW
+
 
 %%
     PROGRAM:
@@ -110,6 +113,7 @@
         |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_float_var($4.value.floatval)); }
         |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_bool_var($4.value.boolval));   }
         |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON    { $$ = $4; set_var(symbol_table, $2, create_str_var($4.value.strval));     }
+        // |   IF_STATEMENT    { $$ = $1; }
         |   OP_SEMICOLON    { 
                                 Variable null_var;
                                 null_var.type = NULL_TYPE;
@@ -117,11 +121,30 @@
                             }
         ;
 
+    // IF_STATEMENT:
+    //         KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_STATEMENT
+    //     ;
+
+    // ELSE_IF_STATEMENT:
+    //         /* Empty */ { /* No action needed */ }
+    //     |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_STATEMENT
+    //     |   KW_ELSE OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY
+    //     ;
+
     EXPRESSION:
             INT_EXP                         { $$ = create_int_var($1);   } /* INTEGER, as INT_EXP   */
         |   FLOAT_EXP                       { $$ = create_float_var($1); } /* FLOAT, as FLOAT_EXP   */
         |   BOOL_EXP                        { $$ = create_bool_var($1);  } /* BOOLEAN, as BOOL_EXP  */
         |   STRING_EXP                      { $$ = create_str_var($1);   } /* STRING, as STRING_EXP */
+        |   IDENTIFIER                      {
+                                                Variable * var = get_var(symbol_table, $1);
+                                                
+                                                if (var == NULL) 
+                                                {
+                                                    yyerror("Undefined variable\n");
+                                                }
+                                                $$ = *var;
+                                            }
         |   OP_OPEN_P EXPRESSION OP_CLOSE_P { $$ = $2; }   
         |   EXPRESSION OP_PLUS EXPRESSION   {
                                                 if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
@@ -136,7 +159,6 @@
 
                                                 else if ($1.type == STRING_TYPE && $3.type == STRING_TYPE) 
                                                 {
-                                                    /* String birleştirme */
                                                     char * concat = malloc(strlen($1.value.strval) + strlen($3.value.strval) + 1);
                                                     strcpy(concat, $1.value.strval);
                                                     strcat(concat, $3.value.strval);
@@ -206,24 +228,29 @@
                                                 }
                                             }
         |   EXPRESSION OP_MOD   EXPRESSION  {
-                                                if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+                                                if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
+                                                {
                                                     
-                                                    if ($3.value.intval == 0) {
+                                                    if ($3.value.intval == 0) 
+                                                    {
                                                         yyerror("Division by zero in modulus operation.");
                                                         YYERROR;
                                                     } 
 
-                                                    else {
+                                                    else 
+                                                    {
                                                         $$ = create_int_var($1.value.intval % $3.value.intval);
                                                     }
                                                 } 
 
-                                                else if ($1.type == FLOAT_TYPE || $3.type == FLOAT_TYPE) {
+                                                else if ($1.type == FLOAT_TYPE || $3.type == FLOAT_TYPE) 
+                                                {
                                                     yyerror("Modulus operator is not supported for float types.");
                                                     YYERROR;
                                                 } 
 
-                                                else {
+                                                else 
+                                                {
                                                     yyerror("Type mismatch: Modulus requires integer operands.");
                                                     YYERROR;
                                                 }
@@ -519,7 +546,7 @@
 int main(int argc, char * argv[])
 {
     /* yydebug = 0;   inactivating debugging */
-    yydebug = 1;     /* activating debugging */
+    yydebug = 0;     /* activating debugging */
 
     symbol_table = create_symbol_table();
 

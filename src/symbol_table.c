@@ -49,11 +49,25 @@ void set_var(SymbolTable * table, char * name, Variable value)
    /*  print_symbol_table(symbol_table);  */
 }
 
+/*------------------------------------------------
+    TO DO:
+    - add control for predefined variables
+
+    Here's how it works now:
+    ___________________
+    > str a = "ahmet";
+    > int a = 4;
+    > a + a;
+    > Result: 8
+    ___________________
+
+------------------------------------------------*/
+
 Variable * get_var(SymbolTable * table, char * name) 
 {
     while (table != NULL) 
     {
-        if (strcmp(table->name, name) == 0) 
+        if (table->name != NULL && strcmp(table->name, name) == 0) 
         {
             return &table->value;
         }
