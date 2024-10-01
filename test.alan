@@ -1,0 +1,19 @@
+int a = 5;
+int b = 4;
+(a + b) * b + 3 - a;
+
+float c = a + b;
+c;
+
+str s1 = "A ";
+str s2 = "Programming Language";
+s1 + s2;
+
+bool b1 = 3 < 4 and "aaaa" < "bbbb";
+bool b2 = 3 < 4 > 5;
+b1;
+b2;
+b1 and b2;
+b1 or b2;
+not b2;
+

@@ -49,10 +49,17 @@
 %type <intval>   BOOL_EXP
 %type <floatval> FLOAT_EXP
 %type <string>   STRING_EXP
+%type <var>      ELIF_PART
+%type <var>      ELSE_PART
+%type <var>      ELSE_IF_PART
 %type <var>      EXPRESSION
-// %type <var>      IF_STATEMENT
 %type <var>      STATEMENT
-// %type <var>      STATEMENTS
+%type <var>      STATEMENTS
+%type <var>      IF_STATEMENT
+%type <var>      ASSIGNMENT_STATEMENT
+%type <var>      DECLARATION_STATEMENT
+%type <var>      EXPRESSION_STATEMENT
+
 
 %right OP_ASSIGNMENT
 %right OP_AUG_PLUS OP_AUG_MINUS
@@ -61,8 +68,8 @@
 %left  OP_AND
 %right OP_NOT
 %left  OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ OP_OPEN_ANGLE OP_CLOSE_ANGLE
-%left  OP_PLUS OP_MINUS   /* Toplama ve çıkarma operatörleri için sol bağlayıcılık */
-%left  OP_MULT OP_DIV OP_MOD /* Çarpma ve bölme operatörleri için sol bağlayıcılık    */
+%left  OP_PLUS OP_MINUS
+%left  OP_MULT OP_DIV OP_MOD
 %right UNARY_MINUS
 %right OP_POW
 
@@ -70,12 +77,17 @@
 %%
     PROGRAM:
         /* Empty program */
-        |   PROGRAM STATEMENT
+        |   PROGRAM STATEMENTS
         |   PROGRAM NEWLINE
         ;
 
+    STATEMENTS:
+            STATEMENT
+        |   STATEMENTS STATEMENT
+        ;
+
     STATEMENT:
-            EXPRESSION OP_SEMICOLON    { 
+            EXPRESSION OP_SEMICOLON     { 
                                             switch ($1.type) 
                                             {
                                                 case INT_TYPE:
@@ -95,20 +107,6 @@
                                             }      
                                         }
 
-            /* TO DO:
-                
-                - add control for redefining of variables
-                - add synactic definitions for updating variables: 
-                (
-                    int a = 5; 
-                    # ...code... 
-                    a = 6;
-                )
-                - add string type of language (Pyhton like definition)
-                - add boolean statement (if-elif-else)
-                - type mismatch control
-            */
-
         |   KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { 
                                                                             if ($4.type != INT_TYPE) 
                                                                             {
@@ -123,16 +121,25 @@
                                                                             }
                                                                         }
         |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { 
-                                                                            if ($4.type != FLOAT_TYPE)
+                                                                            if ($4.type != FLOAT_TYPE && $4.type != INT_TYPE)
                                                                             {
-                                                                                yyerror("Type mismatch: Expected FLOAT type\n");
+                                                                                yyerror("Type mismatch: Expected FLOAT or INT type\n");
                                                                                 YYERROR;
                                                                             }
 
                                                                             else
                                                                             {
-                                                                                $$ = $4; 
-                                                                                set_var(&symbol_table, $2, create_float_var($4.value.floatval)); 
+                                                                                if ($4.type == INT_TYPE)
+                                                                                {
+                                                                                    $$ = create_float_var((float)$4.value.intval);
+                                                                                    set_var(&symbol_table, $2, $$); 
+                                                                                }
+
+                                                                                else
+                                                                                {
+                                                                                    $$ = $4; 
+                                                                                    set_var(&symbol_table, $2, create_float_var($4.value.floatval)); 
+                                                                                }
                                                                             }
                                                                         }
         |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   {
@@ -210,7 +217,7 @@
                                                     }
                                                 }
         
-        // |   IF_STATEMENT    { $$ = $1; }
+        |   IF_STATEMENT    { $$ = $1; }
         |   OP_SEMICOLON    { 
                                 Variable null_var;
                                 null_var.type = NULL_TYPE;
@@ -218,15 +225,24 @@
                             }
         ;
 
-    // IF_STATEMENT:
-    //         KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_STATEMENT
-    //     ;
+    IF_STATEMENT:
+            KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_PART
+        ;
 
-    // ELSE_IF_STATEMENT:
-    //         /* Empty */ { /* No action needed */ }
-    //     |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_STATEMENT
-    //     |   KW_ELSE OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY
-    //     ;
+    ELSE_IF_PART:
+            /* Empty */ { /* No action needed */ }
+
+        |   ELIF_PART {}
+        |   ELSE_PART {}
+        ;
+
+    ELIF_PART:
+           KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_PART {}
+        ;
+
+    ELSE_PART:
+           KW_ELSE OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY
+        ;
 
     EXPRESSION:
             INT_EXP                         { $$ = create_int_var($1);   } /* INTEGER, as INT_EXP   */
@@ -252,6 +268,16 @@
                                                 else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
                                                 {
                                                     $$ = create_float_var($1.value.floatval + $3.value.floatval);
+                                                }
+
+                                                else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                {
+                                                    $$ = create_float_var($1.value.floatval + (float)$3.value.intval);
+                                                }
+
+                                                else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                {
+                                                    $$ = create_float_var((float)$1.value.intval + $3.value.floatval);
                                                 }
 
                                                 else if ($1.type == STRING_TYPE && $3.type == STRING_TYPE) 
@@ -280,6 +306,16 @@
                                                     $$ = create_float_var($1.value.floatval - $3.value.floatval);
                                                 } 
 
+                                                else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                {
+                                                    $$ = create_float_var((float)$1.value.intval - $3.value.floatval);
+                                                } 
+
+                                                else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                {
+                                                    $$ = create_float_var($1.value.floatval - (float)$3.value.intval);
+                                                } 
+
                                                 else {
                                                     yyerror("Type mismatch: Unsupported types for '*' operator\n");
                                                     YYERROR;
@@ -296,13 +332,24 @@
                                                     $$ = create_float_var($1.value.floatval * $3.value.floatval);
                                                 } 
 
+                                                else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                {
+                                                    $$ = create_float_var((float)$1.value.intval * $3.value.floatval);
+                                                } 
+
+                                                else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                {
+                                                    $$ = create_float_var($1.value.floatval * (float)$3.value.intval);
+                                                } 
+
                                                 else {
                                                     yyerror("Type mismatch: Unsupported types for '*' operator\n");
                                                     YYERROR;
                                                 } 
                                             }
         |   EXPRESSION OP_DIV   EXPRESSION  {
-                                                if ($3.value.floatval == 0) 
+                                                if (($3.type == INT_TYPE   && $3.value.intval == 0) ||
+                                                    ($3.type == FLOAT_TYPE && $3.value.floatval == 0.0)) 
                                                 {
                                                     yyerror("Division by zero\n");
                                                     YYERROR;
@@ -310,7 +357,7 @@
 
                                                 else if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
                                                 {
-                                                    $$ = create_float_var((float) $1.value.intval / $3.value.intval);
+                                                    $$ = create_float_var((float)$1.value.intval / $3.value.intval);
                                                 } 
 
                                                 else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
@@ -340,12 +387,6 @@
                                                     }
                                                 } 
 
-                                                else if ($1.type == FLOAT_TYPE || $3.type == FLOAT_TYPE) 
-                                                {
-                                                    yyerror("Modulus operator is not supported for float types\n");
-                                                    YYERROR;
-                                                } 
-
                                                 else 
                                                 {
                                                     yyerror("Type mismatch: Modulus requires integer operands\n");
@@ -355,7 +396,7 @@
         |   EXPRESSION OP_POW   EXPRESSION  {
                                                 if ($1.type == INT_TYPE && $3.type == INT_TYPE) 
                                                 {
-                                                    $$ = create_float_var(pow($1.value.intval, $3.value.intval));
+                                                    $$ = create_int_var((int)pow($1.value.intval, $3.value.intval));
                                                 }
 
                                                 else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
@@ -380,30 +421,38 @@
                                                 }
                                             }
 
-        |   IDENTIFIER OP_ASSIGNMENT EXPRESSION     {
-                                                        Variable * var = get_var(symbol_table, $1);
+        |   IDENTIFIER OP_ASSIGNMENT EXPRESSION {
+                                                    Variable * var = get_var(symbol_table, $1);
 
-                                                        if (var == NULL) 
+                                                    if (var == NULL) 
+                                                    {
+                                                        yyerror("Variable not defined\n");
+                                                        YYERROR;
+                                                    } 
+
+                                                    else 
+                                                    {
+                                                        if (var->type == FLOAT_TYPE && $3.type == INT_TYPE) 
                                                         {
-                                                            yyerror("Variable not defined\n");
-                                                            YYERROR;
+                                                            var->value.floatval = (float)$3.value.intval;
+                                                        }
+                                                        else if (var->type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
+                                                        {
+                                                            var->value.floatval = $3.value.floatval;
+                                                        }
+                                                        else if (var->type == INT_TYPE && $3.type == INT_TYPE) 
+                                                        {
+                                                            var->value.intval = $3.value.intval;
                                                         } 
 
-                                                        else 
+                                                        else
                                                         {
-                                                            if (var->type == $3.type) 
-                                                            {
-                                                                *var = $3;
-                                                            } 
-
-                                                            else
-                                                            {
-                                                                yyerror("Type mismatch in assignment\n");
-                                                                YYERROR;
-                                                            }
+                                                            yyerror("Type mismatch in assignment\n");
+                                                            YYERROR;
                                                         }
-                                                        
                                                     }
+                                                    
+                                                }
         /*-------------------------------------------------
             SYNOPSIS for Augmented Arithmetic Operators:
 
@@ -423,6 +472,21 @@
                                                     else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
                                                     {
                                                         $1.value.floatval += $3.value.floatval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        float temp = (float)$1.value.intval;
+                                                        temp += $3.value.floatval;
+                                                        $1.value.floatval = temp;
+                                                        $1.type = FLOAT_TYPE;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.floatval += (float)$3.value.intval;
                                                         $$ = $1;
                                                     } 
 
@@ -455,6 +519,21 @@
                                                         $$ = $1;
                                                     } 
 
+                                                    else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        float temp = (float)$1.value.intval;
+                                                        temp += $3.value.floatval;
+                                                        $1.value.floatval = temp; // INT -> FLOAT dönüşüm
+                                                        $1.type = FLOAT_TYPE; // Tipi float yapıyoruz
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.floatval -= (float)$3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
                                                     else 
                                                     {
                                                         yyerror("Type mismatch: incompatible types for '-='\n");
@@ -474,6 +553,21 @@
                                                         $$ = $1;
                                                     } 
 
+                                                    else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        float temp = (float)$1.value.intval;
+                                                        temp += $3.value.floatval;
+                                                        $1.value.floatval = temp; // INT -> FLOAT dönüşüm
+                                                        $1.type = FLOAT_TYPE; // Tipi float yapıyoruz
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.floatval *= (float)$3.value.intval;
+                                                        $$ = $1;
+                                                    } 
+
                                                     else 
                                                     {
                                                         yyerror("Type mismatch: incompatible types for '*='\n");
@@ -481,13 +575,8 @@
                                                     }
                                                 }
         |   EXPRESSION OP_AUG_DIV   EXPRESSION  {
-                                                    if ($3.type == INT_TYPE && $3.value.intval == 0) 
-                                                    {
-                                                        yyerror("Division by zero\n");
-                                                        YYERROR;
-                                                    } 
-
-                                                    else if ($3.type == FLOAT_TYPE && $3.value.floatval == 0.0) 
+                                                    if (($3.type == INT_TYPE   && $3.value.intval == 0) ||
+                                                        ($3.type == FLOAT_TYPE && $3.value.floatval == 0.0)) 
                                                     {
                                                         yyerror("Division by zero\n");
                                                         YYERROR;
@@ -502,6 +591,21 @@
                                                     else if ($1.type == FLOAT_TYPE && $3.type == FLOAT_TYPE) 
                                                     {
                                                         $1.value.floatval /= $3.value.floatval;
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == INT_TYPE && $3.type == FLOAT_TYPE) 
+                                                    {
+                                                        float temp = (float)$1.value.intval;
+                                                        temp += $3.value.floatval;
+                                                        $1.value.floatval = temp; // INT -> FLOAT dönüşüm
+                                                        $1.type = FLOAT_TYPE; // Tipi float yapıyoruz
+                                                        $$ = $1;
+                                                    } 
+
+                                                    else if ($1.type == FLOAT_TYPE && $3.type == INT_TYPE) 
+                                                    {
+                                                        $1.value.floatval /= (float)$3.value.intval;
                                                         $$ = $1;
                                                     } 
 
@@ -630,20 +734,7 @@
                                                             yyerror("Type mismatch: 'not' operator requires a boolean operand\n");
                                                             YYERROR;
                                                         }
-                                                    }
-
-        /*-------------------------------------------------------------------------------
-            TO DO:
-
-            Add CFG rules and necessary functions for sequential comparison operators.
-
-            For example:
-
-            a > b < c;
-            
-            must be evaluated as:
-            (a > b) and (b < c);
-        -------------------------------------------------------------------------------*/                                                                                                                                                                                                
+                                                    }                                                                                                                                                                                              
         ;
 
     INT_EXP:
@@ -651,8 +742,8 @@
         ;
 
     BOOL_EXP:
-            KW_TRUE  { $$ = $1; }  /* true  -> 1, lexer'den gelen değer kullanılır */
-        |   KW_FALSE { $$ = $1; }  /* false -> 0, lexer'den gelen değer kullanılır */
+            KW_TRUE  { $$ = $1; }  /* true  -> 1, from lexer */
+        |   KW_FALSE { $$ = $1; }  /* false -> 0, from lexer */
         ;
 
     FLOAT_EXP:
@@ -675,13 +766,9 @@ int main(int argc, char * argv[])
     {
         printf("Type (ctrl+c) for exit\n");
 
-        while (1)
-        {
-            printf("> ");
-            yyparse();
-            /* cleaning input */
-            yyclearin;
-        }
+        yyparse();
+        /* cleaning input */
+        yyclearin;
     }
 
     else if (argc == 2)
