@@ -1,0 +1,4 @@
+/parser
+*.o
+Lexer/*.yy.*
+Parser/*.tab.*

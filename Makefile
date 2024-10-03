@@ -4,51 +4,75 @@ FLEX = flex
 YACC = bison
 
 # CFLAGS = -Wall -pedantic-errors -std=gnu99
-CFLAGS += -D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE
-CFLAGS += -D_FILE_OFFSET_BITS=64 -Iinclude
-CFLAGS += -lm 
-LIBS = -lfl -lm
-YACCFLAGS += -Wcounterexamples
+INTERNAL_CFLAGS = \
+	-D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
+	-Iinclude \
+	$(CFLAGS)
+INTERNAL_LDFLAGS = $(LDFLAGS)
+INTERNAL_LIBS = -lfl -lm $(LDLIBS)
+INTERNAL_YACCFLAGS = -Wcounterexamples $(YACCFLAGS)
 
 # Variables
-LEXER = Lexer/lexer.l
-PARSER = Parser/parser.y
-LEX_OUTPUT = Lexer/lex.yy.c
+LEXER_SOURCE = Lexer/lexer.l
+LEXER_OUTPUT = Lexer/lex.yy.c
+LEXER_HEADER = Lexer/lex.yy.h
+LEXER_OBJECT = Lexer/lex.yy.o
+
+PARSER_SOURCE = Parser/parser.y
 PARSER_OUTPUT = Parser/parser.tab.c
 PARSER_HEADER = Parser/parser.tab.h
-LEX_HEADER = Lexer/lex.yy.h
-EXEC = parser
+PARSER_OBJECT = Parser/parser.tab.o
+
+PROGRAM = parser
+OBJECTS = \
+      src/logical.o \
+      src/symbol_table.o \
+      src/utils.o \
+      src/variables.o \
+      $(LEXER_OBJECT) \
+      $(PARSER_OBJECT)
+HEADERS = \
+	  include/logical.h \
+	  include/symbol_table.h \
+	  include/utils.h \
+	  include/variables.h \
+	  $(LEXER_HEADER) \
+	  $(PARSER_HEADER)
+
 TEST_FILE = tests/test.alan
 
 # Targets
-all: $(EXEC)
+all: $(PROGRAM)
 
-# Generate lexer and parser files
-$(LEX_OUTPUT): $(LEXER)
-	$(FLEX) --header-file=$(LEX_HEADER) -o $(LEX_OUTPUT) $(LEXER)
+$(OBJECTS): $(HEADERS) $(OBJECTS:.o=.c)
 
-$(PARSER_OUTPUT): $(PARSER)
-	# $(YACC) -d -o $(PARSER_OUTPUT) $(PARSER)
-	$(YACC) -d $(YACCFLAGS) -o $(PARSER_OUTPUT) $(PARSER)
+.SUFFIXES: .c .o
+.c.o:
+	$(CC) $(INTERNAL_CFLAGS) -c -o $@ $<
 
-# Compile all source files
-$(EXEC): $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) $(LEX_HEADER) src/symbol_table.c src/variables.c src/utils.c src/logical.c
-	$(CC) $(LEX_OUTPUT) $(PARSER_OUTPUT) src/symbol_table.c src/variables.c src/utils.c src/logical.c -o $(EXEC) $(CFLAGS) $(LIBS)
+$(PROGRAM): $(OBJECTS)
+	$(CC) $(INTERNAL_LDFLAGS) -o $@ $(OBJECTS) $(INTERNAL_LIBS)
+
+$(LEXER_OUTPUT) $(LEXER_HEADER): $(LEXER_SOURCE)
+	$(FLEX) --header-file=$(LEXER_HEADER) -o $(LEXER_OUTPUT) $(LEXER_SOURCE)
+
+$(PARSER_OUTPUT) $(PARSER_HEADER): $(PARSER_SOURCE)
+	$(YACC) -d $(INTERNAL_YACCFLAGS) -o $(PARSER_OUTPUT) $(PARSER_SOURCE)
 
 # Run the parser with test file
-test: $(EXEC)
-	./$(EXEC) $(TEST_FILE)
+test: $(PROGRAM)
+	./$(PROGRAM) $(TEST_FILE)
 
 # Clean generated files
 clean:
-	rm -f $(LEX_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) $(LEX_HEADER) Lexer/lex.yy.c Parser/parser.tab.* $(EXEC) *.o
+	rm -f $(LEXER_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) $(LEXER_HEADER) $(PROGRAM) src/*.o Lexer/*.o Parser/*.o
 
 # Run parser
-run: $(EXEC)
-	./$(EXEC)
+run: $(PROGRAM)
+	./$(PROGRAM)
 
 # Valgrind memory check
-memcheck: $(EXEC)
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(EXEC)
+memcheck: $(PROGRAM)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(PROGRAM)
 
 .PHONY: all clean run test memcheck
