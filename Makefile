@@ -3,7 +3,9 @@ CC = cc
 FLEX = flex
 YACC = yacc
 
-# CFLAGS = -Wall -pedantic-errors -std=gnu99
+CFLAGS = -g -Wall
+YACCFLAGS = -Wcounterexamples
+
 INTERNAL_CFLAGS = \
 	-std=gnu99 \
 	-D_GNU_SOURCE \
@@ -12,7 +14,7 @@ INTERNAL_CFLAGS = \
 	$(CFLAGS)
 INTERNAL_LDFLAGS = $(LDFLAGS)
 INTERNAL_LIBS = -lfl -lm $(LDLIBS)
-INTERNAL_YACCFLAGS = -Wcounterexamples $(YACCFLAGS)
+INTERNAL_YACCFLAGS = $(YACCFLAGS)
 
 # Variables
 LEXER_SOURCE = Lexer/lexer.l
