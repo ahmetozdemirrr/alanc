@@ -1,11 +1,13 @@
 # programs
 CC = cc
 FLEX = flex
-YACC = bison
+YACC = yacc
 
 # CFLAGS = -Wall -pedantic-errors -std=gnu99
 INTERNAL_CFLAGS = \
-	-D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
+	-std=gnu99 \
+	-D_GNU_SOURCE \
+	-D_FILE_OFFSET_BITS=64 \
 	-Iinclude \
 	$(CFLAGS)
 INTERNAL_LDFLAGS = $(LDFLAGS)
