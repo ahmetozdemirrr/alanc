@@ -1,6 +1,6 @@
 /* ast.c */
 
-#include "../include/ast.h"
+#include <ast.h>
 
 /* Creates a new AST node with the given type */
 ASTNode * new_ast_node(ASTNodeType type)
@@ -54,6 +54,8 @@ ASTNode * new_bool_literal(int value)
 {
 	ASTNode * node = new_ast_node(AST_BOOL_LITERAL);
 	node->data.literal.boolValue = value;
+
+	return node;
 }
 
 /* Creates a new binary operation AST node */
@@ -171,7 +173,7 @@ ASTNodeList * new_statement_list(ASTNode * first, ASTNode * second)
     ASTNodeList * list = NULL;
     list = add_statement_list(list, first);
     list = add_statement_list(list, second);
-    
+
     return list;
 }
 

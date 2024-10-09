@@ -3,13 +3,13 @@ CC = cc
 FLEX = flex
 YACC = yacc
 
-CFLAGS = -g -Wall
-YACCFLAGS = -Wcounterexamples
+CFLAGS = -g -Wall -Wextra -Werror
+YACCFLAGS = -Wcex
 
 INTERNAL_CFLAGS = \
 	-std=gnu99 \
 	-D_GNU_SOURCE \
-	# -D_FILE_OFFSET_BITS=64 \
+	-D_FILE_OFFSET_BITS=64 \
 	-Iinclude \
 	$(CFLAGS)
 INTERNAL_LDFLAGS = $(LDFLAGS)
