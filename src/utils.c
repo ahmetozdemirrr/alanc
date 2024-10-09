@@ -9,6 +9,6 @@ int yylex();
 /* Hata mesajlarını göstermek için yyerror fonksiyonu */
 void yyerror(const char * s) 
 {
-    fprintf(stderr, "Error: %sat line: %d\ncolumn: %d\n", s, yylineno, yycolumn);
+    fprintf(stderr, "at %d:%d: error: %s\n", yylineno, yycolumn, s);
     exit(EXIT_FAILURE);
 }

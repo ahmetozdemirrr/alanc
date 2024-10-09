@@ -2,6 +2,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "../include/variables.h"
+    #include "../include/ast.h"
     #include "../Parser/parser.tab.h" /* BİSON generates this file */
 
     int yycolumn = 1;
@@ -227,12 +228,12 @@ return              {
                     }
 true                {
                         yycolumn += yyleng;
-                        yylval.boolean = 1; 
+                        yylval.node = new_bool_literal(1); 
                         return KW_TRUE;         
                     }
 false               {
                         yycolumn += yyleng; 
-                        yylval.boolean = 0;
+                        yylval.node = new_bool_literal(0);
                         return KW_FALSE;        
                     }
 null                {
@@ -247,19 +248,19 @@ null                {
                     }
 {INTEGER_LITERAL}   {
                         yycolumn += yyleng;
-                        yylval.intval = atoi(yytext); 
+                        yylval.node = new_integer_literal(atoi(yytext)); 
                         return INTEGER_LITERAL;     
                     }
 {FLOAT_LITERAL}     {
                         yycolumn += yyleng;
-                        yylval.floatval = atof(yytext); 
+                        yylval.node = new_float_literal(atof(yytext)); 
                         return FLOAT_LITERAL;     
                     }
 {STRING_LITERAL}    {
                         yycolumn += yyleng;
                         /* İlk ve son çift tırnağı kaldırarak sadece string içeriğini al */
-                        yylval.string = strdup(yytext + 1);  /* Başlangıçtaki tırnağı atla */
-                        yylval.string[strlen(yylval.string) - 1] = '\0';  /* Son tırnağı kaldır */
+                        yylval.node = new_string_literal(strdup(yytext + 1));  /* Başlangıçtaki tırnağı atla */
+                        yylval.node->data.literal.stringValue[strlen(yylval.node->data.literal.stringValue) - 1] = '\0';  
                         return STRING_LITERAL;
                     }
 {WHITESPACE}        { yycolumn += yyleng;   }

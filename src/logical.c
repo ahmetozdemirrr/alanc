@@ -1,6 +1,6 @@
 /* logical.c */
 
-#include "logical.h"
+#include "../include/logical.h"
 
 
 /* Convert boolean values to integers */

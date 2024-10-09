@@ -9,7 +9,7 @@ YACCFLAGS = -Wcounterexamples
 INTERNAL_CFLAGS = \
 	-std=gnu99 \
 	-D_GNU_SOURCE \
-	-D_FILE_OFFSET_BITS=64 \
+	# -D_FILE_OFFSET_BITS=64 \
 	-Iinclude \
 	$(CFLAGS)
 INTERNAL_LDFLAGS = $(LDFLAGS)
@@ -33,6 +33,7 @@ OBJECTS = \
       src/symbol_table.o \
       src/utils.o \
       src/variables.o \
+      src/ast.o \
       $(LEXER_OBJECT) \
       $(PARSER_OBJECT)
 HEADERS = \
@@ -40,6 +41,7 @@ HEADERS = \
 	  include/symbol_table.h \
 	  include/utils.h \
 	  include/variables.h \
+	  include/ast.h \
 	  $(LEXER_HEADER) \
 	  $(PARSER_HEADER)
 
