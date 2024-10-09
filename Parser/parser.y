@@ -49,16 +49,8 @@
 %type <intval>   BOOL_EXP
 %type <floatval> FLOAT_EXP
 %type <string>   STRING_EXP
-%type <var>      ELIF_PART
-%type <var>      ELSE_PART
-%type <var>      ELSE_IF_PART
 %type <var>      EXPRESSION
 %type <var>      STATEMENT
-%type <var>      STATEMENTS
-%type <var>      IF_STATEMENT
-%type <var>      ASSIGNMENT_STATEMENT
-%type <var>      DECLARATION_STATEMENT
-%type <var>      EXPRESSION_STATEMENT
 
 
 %right OP_ASSIGNMENT
@@ -77,13 +69,8 @@
 %%
     PROGRAM:
         /* Empty program */
-        |   PROGRAM STATEMENTS
+        |   PROGRAM STATEMENT
         |   PROGRAM NEWLINE
-        ;
-
-    STATEMENTS:
-            STATEMENT
-        |   STATEMENTS STATEMENT
         ;
 
     STATEMENT:
@@ -216,32 +203,11 @@
                                                         set_var(&symbol_table, $2, create_str_var(NULL));     
                                                     }
                                                 }
-        
-        |   IF_STATEMENT    { $$ = $1; }
         |   OP_SEMICOLON    { 
                                 Variable null_var;
                                 null_var.type = NULL_TYPE;
                                 $$ = null_var;
                             }
-        ;
-
-    IF_STATEMENT:
-            KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_PART
-        ;
-
-    ELSE_IF_PART:
-            /* Empty */ { /* No action needed */ }
-
-        |   ELIF_PART {}
-        |   ELSE_PART {}
-        ;
-
-    ELIF_PART:
-           KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY ELSE_IF_PART {}
-        ;
-
-    ELSE_PART:
-           KW_ELSE OP_OPEN_P EXPRESSION OP_CLOSE_P OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY
         ;
 
     EXPRESSION:
@@ -791,111 +757,6 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
-
-/*   
-
-from ../Parser/parser.tab.h tokens index:
-
-#ifndef YY_YY_PARSER_PARSER_TAB_H_INCLUDED
-# define YY_YY_PARSER_PARSER_TAB_H_INCLUDED
-// Debug traces. 
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-
-// Token kinds.  
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     / "end of file"  
-    YYerror = 256,                 /* error  
-    YYUNDEF = 257,                 /* "invalid token"  
-    KW_TRUE = 258,                 /* KW_TRUE  
-    KW_FALSE = 259,                /* KW_FALSE  
-    KW_NULL = 260,                 /* KW_NULL  
-    KW_IF = 261,                   /* KW_IF  
-    KW_ELSE = 262,                 /* KW_ELSE  
-    KW_ELIF = 263,                 /* KW_ELIF  
-    KW_INT = 264,                  /* KW_INT  
-    KW_FLOAT = 265,                /* KW_FLOAT  
-    KW_BOOL = 266,                 /* KW_BOOL  
-    KW_STR = 267,                  /* KW_STR  
-    KW_RETURN = 268,               /* KW_RETURN  
-    KW_FUNCTION = 269,             /* KW_FUNCTION  
-    KW_PROCEDURE = 270,            /* KW_PROCEDURE  
-    KW_INCLUDE = 271,              /* KW_INCLUDE  
-    INTEGER_LITERAL = 272,         /* INTEGER_LITERAL  
-    FLOAT_LITERAL = 273,           /* FLOAT_LITERAL  
-    STRING_LITERAL = 274,          /* STRING_LITERAL  
-    IDENTIFIER = 275,              /* IDENTIFIER  
-    COMMENT = 276,                 /* COMMENT  
-    OP_PLUS = 277,                 /* OP_PLUS  
-    OP_MINUS = 278,                /* OP_MINUS  
-    OP_MULT = 279,                 /* OP_MULT  
-    OP_DIV = 280,                  /* OP_DIV  
-    OP_ASSIGNMENT = 281,           /* OP_ASSIGNMENT  
-    NEWLINE = 282,                 /* NEWLINE  
-    OP_EXPO = 283,                 /* OP_EXPO  
-    OP_OPEN_P = 284,               /* OP_OPEN_P  
-    OP_CLOSE_P = 285,              /* OP_CLOSE_P  
-    OP_OPEN_CURLY = 286,           /* OP_OPEN_CURLY  
-    OP_CLOSE_CURLY = 287,          /* OP_CLOSE_CURLY  
-    OP_MOD = 288,                  /* OP_MOD  
-    OP_OPEN_SQU = 289,             /* OP_OPEN_SQU  
-    OP_CLOSE_SQU = 290,            /* OP_CLOSE_SQU  
-    OP_COMMA = 291,                /* OP_COMMA  
-    OP_DOT = 292,                  /* OP_DOT  
-    OP_QUOTA = 293,                /* OP_QUOTA  
-    OP_POW = 294,                  /* OP_POW  
-    OP_OPEN_ANGLE = 295,           /* OP_OPEN_ANGLE  
-    OP_CLOSE_ANGLE = 296,          /* OP_CLOSE_ANGLE  
-    OP_SEMICOLON = 297,            /* OP_SEMICOLON  
-    POINTER = 298,                 /* POINTER  
-    OP_AND = 299,                  /* OP_AND  
-    OP_OR = 300,                   /* OP_OR  
-    OP_NOT = 301,                  /* OP_NOT  
-    OP_EQ_LESS = 302,              /* OP_EQ_LESS  
-    OP_EQ_GRE = 303,               /* OP_EQ_GRE  
-    OP_IS_EQ = 304,                /* OP_IS_EQ  
-    OP_ISNT_EQ = 305,              /* OP_ISNT_EQ  
-    OP_AUG_PLUS = 306,             /* OP_AUG_PLUS  
-    OP_AUG_MINUS = 307,            /* OP_AUG_MINUS  
-    OP_AUG_MULT = 308,             /* OP_AUG_MULT  
-    OP_AUG_DIV = 309,              /* OP_AUG_DIV  
-    OP_AUG_MOD = 310,              /* OP_AUG_MOD  
-    UNARY_MINUS = 311              /* UNARY_MINUS  
-  };
-  typedef enum yytokentype yytoken_kind_t;
-#endif
-
-// Value type. 
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 17 "Parser/parser.y"
-
-    int    intval;      /* for Integer types          
-    float  floatval;    /* for Float types            
-    char * string;      /* for String types           
-    int    boolean;     /* for Boolean types (0 or 1) 
-    void * nullval;     /* for Null                 
-    Variable var;
-
-#line 129 "Parser/parser.tab.h"
-
-};
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
-#endif
-
-*/
-
 
 /*________________________________________________________________________________
 
