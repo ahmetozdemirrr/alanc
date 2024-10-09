@@ -1,36 +1,38 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "../include/symbol_table.h"
+
+// local includes
+#include <symbol_table.h>
 
 SymbolTable * symbol_table = NULL;
 
-SymbolTable * create_symbol_table() 
+SymbolTable * create_symbol_table()
 {
     return NULL;
 }
 
-void set_var(SymbolTable ** table, char * name, Variable value) 
+void set_var(SymbolTable ** table, char * name, Variable value)
 {
-    if (*table == NULL) 
+    if (*table == NULL)
     {
         *table = (SymbolTable *)malloc(sizeof(SymbolTable));
         (*table)->name = strdup(name);
         (*table)->value = value;
         (*table)->next = NULL;
-    } 
+    }
 
-    else 
+    else
     {
         SymbolTable * entry = *table;
 
-        while (entry != NULL) 
+        while (entry != NULL)
         {
-            if (strcmp(entry->name, name) == 0) 
+            if (strcmp(entry->name, name) == 0)
             {
                 char error_msg_buffer[100];
                 sprintf(error_msg_buffer, "Error: Variable '%s' is already defined.\n", name);
-                
+
                 yyerror(error_msg_buffer);
             }
             entry = entry->next;
@@ -59,11 +61,11 @@ void set_var(SymbolTable ** table, char * name, Variable value)
 
 ------------------------------------------------*/
 
-Variable * get_var(SymbolTable * table, char * name) 
+Variable * get_var(SymbolTable * table, char * name)
 {
-    while (table != NULL) 
+    while (table != NULL)
     {
-        if (table->name != NULL && strcmp(table->name, name) == 0) 
+        if (table->name != NULL && strcmp(table->name, name) == 0)
         {
             return &table->value;
         }
@@ -72,9 +74,9 @@ Variable * get_var(SymbolTable * table, char * name)
     return NULL;
 }
 
-void free_symbol_table(SymbolTable * table) 
+void free_symbol_table(SymbolTable * table)
 {
-    while (table != NULL) 
+    while (table != NULL)
     {
         SymbolTable * temp = table;
         table = table->next;
@@ -87,15 +89,15 @@ void free_symbol_table(SymbolTable * table)
 void print_symbol_table(SymbolTable * table)
 {
     SymbolTable * entry = table;
-    
+
     printf("Symbol Table:\n");
     printf("-----------------------------\n");
 
-    while (entry != NULL) 
+    while (entry != NULL)
     {
         printf("Name: %s, Type: ", entry->name);
-        
-        switch (entry->value.type) 
+
+        switch (entry->value.type)
         {
             case INT_TYPE:
                 printf("INT, Value: %d\n", entry->value.value.intval);

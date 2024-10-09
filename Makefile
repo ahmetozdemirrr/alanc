@@ -3,8 +3,8 @@ CC = cc
 FLEX = flex
 YACC = yacc
 
-CFLAGS = -g -Wall
-YACCFLAGS = -Wcounterexamples
+CFLAGS = -g -Wall -Wextra -Werror
+YACCFLAGS = -Wcex
 
 INTERNAL_CFLAGS = \
 	-std=gnu99 \

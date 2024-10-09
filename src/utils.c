@@ -1,4 +1,5 @@
-#include "../include/utils.h"
+// local includes
+#include <utils.h>
 
 extern int yylineno;
 extern int yycolumn;
@@ -7,7 +8,7 @@ extern int yycolumn;
 int yylex();
 
 /* Hata mesajlarını göstermek için yyerror fonksiyonu */
-void yyerror(const char * s) 
+void yyerror(const char * s)
 {
     fprintf(stderr, "Error: %sat line: %d\ncolumn: %d\n", s, yylineno, yycolumn);
     exit(EXIT_FAILURE);
