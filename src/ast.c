@@ -208,149 +208,143 @@ ASTNodeList * merge_statement_lists(ASTNodeList * list1, ASTNodeList * list2)
     return list1;
 }
 
-// /* Frees the memory of an AST node and its children */
-// void free_ast_node(ASTNode * node) 
-// {
-//     if (!node) 
-//     {
-//         return;
-//     }
+/* Frees the memory of an AST node and its children */
+void free_ast_node(ASTNode * node)
+{
+    if (!node)
+    {
+        return;
+    }
 
-//     switch (node->type) 
-//     {
-//         case AST_INT_LITERAL:
-//         case AST_FLOAT_LITERAL:
-//         case AST_BOOL_LITERAL:
-//             break;
+    switch (node->type)
+    {
+        case AST_INT_LITERAL:
+        case AST_FLOAT_LITERAL:
+        case AST_BOOL_LITERAL:
+            break;
 
-//         case AST_STRING_LITERAL:
-//             free(node->data.literal.stringValue);
-//             break;
+        case AST_STRING_LITERAL:
+            free(node->data.literal.stringValue);
+            break;
 
-//         case AST_VARIABLE_DECLARATION:
-//             free(node->data.variable.variableName);
-//             free_ast_node(node->data.variable.expression);
-//             break;
+        case AST_VARIABLE_DECLARATION:
+            free(node->data.variable.variableName);
+            free_ast_node(node->data.variable.expression);
+            break;
 
-//         case AST_IF_STATEMENT:
-//             free_ast_node(node->data.ifNode.condition);
-//             free_ast_node(node->data.ifNode.thenBranch);
-//             free_ast_node(node->data.ifNode.elifBranch);
-//             free_ast_node(node->data.ifNode.elseBranch);
-//             break;
+        case AST_IF_STATEMENT:
+            free_ast_node(node->data.ifNode.condition);
+            free_ast_node(node->data.ifNode.thenBranch);
+            free_ast_node(node->data.ifNode.elseBranch);
+            break;
 
-//         case AST_PLUS:
-//         case AST_MINUS:
-//         case AST_MULTIPLY:
-//         case AST_DIVIDE:
-//         case AST_MODULO:
-//         case AST_AND:
-//         case AST_OR:
-//             free_ast_node(node->data.binaryOp.left);
-//             free_ast_node(node->data.binaryOp.right);
-//             break;
+        case AST_PLUS:
+        case AST_MINUS:
+        case AST_MULTIPLY:
+        case AST_DIVIDE:
+        case AST_MODULO:
+        case AST_AND:
+        case AST_OR:
+            free_ast_node(node->data.binaryOp.left);
+            free_ast_node(node->data.binaryOp.right);
+            break;
 
-//         case AST_NOT:
-//             free_ast_node(node->data.unaryOp.operand);
-//             break;
+        case AST_NOT:
+            free_ast_node(node->data.unaryOp.operand);
+            break;
 
-//         default:
-//             break;
-//     }
-//     free(node);
-// }
+        default:
+            break;
+    }
+    free(node);
+}
 
-// /* display the all ast */
-// void display_ast(ASTNode * node, int indent)
-// {
-// 	if (node == NULL) return;
+/* display the all ast */
+void display_ast(ASTNode * node, int indent)
+{
+	if (node == NULL) return;
 
-// 	for (int i = 0; i < indent; ++i) printf("  ");
+	for (int i = 0; i < indent; ++i) printf("  ");
 
-// 	switch (node->type) 
-// 	{
-//         case AST_INT_LITERAL:
-//             printf("IntLiteral: %d\n", node->data.literal.intValue);
-//             break;
+	switch (node->type)
+	{
+        case AST_INT_LITERAL:
+            printf("IntLiteral: %d\n", node->data.literal.intValue);
+            break;
 
-//         case AST_FLOAT_LITERAL:
-//             printf("FloatLiteral: %f\n", node->data.literal.floatValue);
-//             break;
+        case AST_FLOAT_LITERAL:
+            printf("FloatLiteral: %f\n", node->data.literal.floatValue);
+            break;
 
-//         case AST_STRING_LITERAL:
-//             printf("StringLiteral: %s\n", node->data.literal.stringValue);
-//             break;
+        case AST_STRING_LITERAL:
+            printf("StringLiteral: %s\n", node->data.literal.stringValue);
+            break;
 
-//         case AST_BOOL_LITERAL:
-//             printf("BoolLiteral: %s\n", node->data.literal.boolValue ? "true" : "false");
-//             break;
+        case AST_BOOL_LITERAL:
+            printf("BoolLiteral: %s\n", node->data.literal.boolValue ? "true" : "false");
+            break;
 
-//         case AST_VARIABLE_DECLARATION:
-//             printf("VariableDeclaration: %s\n", node->data.variable.variableName);
-//             display_ast(node->data.variable.expression, indent + 1);
-//             break;
+        case AST_VARIABLE_DECLARATION:
+            printf("VariableDeclaration: %s\n", node->data.variable.variableName);
+            display_ast(node->data.variable.expression, indent + 1);
+            break;
 
-//         case AST_ASSIGNMENT_STATEMENT:
-//             printf("Assignment: %s = \n", node->data.variable.variableName);
-//             display_ast(node->data.variable.expression, indent + 1);
-//             break;
+        case AST_ASSIGNMENT_STATEMENT:
+            printf("Assignment: %s = \n", node->data.variable.variableName);
+            display_ast(node->data.variable.expression, indent + 1);
+            break;
 
-//         case AST_PLUS:
-//             printf("BinaryOp: PLUS\n");
-//             display_ast(node->data.binaryOp.left, indent + 1);
-//             display_ast(node->data.binaryOp.right, indent + 1);
-//             break;
+        case AST_PLUS:
+            printf("BinaryOp: PLUS\n");
+            display_ast(node->data.binaryOp.left, indent + 1);
+            display_ast(node->data.binaryOp.right, indent + 1);
+            break;
 
-//         case AST_MINUS:
-//             printf("BinaryOp: MINUS\n");
-//             display_ast(node->data.binaryOp.left, indent + 1);
-//             display_ast(node->data.binaryOp.right, indent + 1);
-//             break;
+        case AST_MINUS:
+            printf("BinaryOp: MINUS\n");
+            display_ast(node->data.binaryOp.left, indent + 1);
+            display_ast(node->data.binaryOp.right, indent + 1);
+            break;
 
-//         case AST_MULTIPLY:
-//             printf("BinaryOp: MULTIPLY\n");
-//             display_ast(node->data.binaryOp.left, indent + 1);
-//             display_ast(node->data.binaryOp.right, indent + 1);
-//             break;
+        case AST_MULTIPLY:
+            printf("BinaryOp: MULTIPLY\n");
+            display_ast(node->data.binaryOp.left, indent + 1);
+            display_ast(node->data.binaryOp.right, indent + 1);
+            break;
 
-//         case AST_DIVIDE:
-//             printf("BinaryOp: DIVIDE\n");
-//             display_ast(node->data.binaryOp.left, indent + 1);
-//             display_ast(node->data.binaryOp.right, indent + 1);
-//             break;
+        case AST_DIVIDE:
+            printf("BinaryOp: DIVIDE\n");
+            display_ast(node->data.binaryOp.left, indent + 1);
+            display_ast(node->data.binaryOp.right, indent + 1);
+            break;
 
-//         case AST_IF_STATEMENT:
-//             printf("IfStatement: \n");
-//             printf("  Condition:\n");
-//             display_ast(node->data.ifNode.condition, indent + 2);
-//             printf("  ThenBranch:\n");
-//             display_ast(node->data.ifNode.thenBranch, indent + 2);
+        case AST_IF_STATEMENT:
+            printf("IfStatement: \n");
+            printf("  Condition:\n");
+            display_ast(node->data.ifNode.condition, indent + 2);
+            printf("  ThenBranch:\n");
+            display_ast(node->data.ifNode.thenBranch, indent + 2);
 
-//             if (node->data.ifNode.elifBranch) 
-//             {
-//                 printf("  ElifBranch:\n");
-//                 display_ast(node->data.ifNode.elifBranch, indent + 2);
-//             }
-//             if (node->data.ifNode.elseBranch) 
-//             {
-//                 printf("  ElseBranch:\n");
-//                 display_ast(node->data.ifNode.elseBranch, indent + 2);
-//             }
-//             break;
+            if (node->data.ifNode.elseBranch)
+            {
+                printf("  ElseBranch:\n");
+                display_ast(node->data.ifNode.elseBranch, indent + 2);
+            }
+            break;
 
-//         default:
-//             printf("Unknown AST Node Type\n");
-//             break;
-//     }
-// }
+        default:
+            printf("Unknown AST Node Type\n");
+            break;
+    }
+}
 
-// void display_ast_list(ASTNodeList * list, int indent) 
-// {
-//     ASTNodeList * current = list;
+void display_ast_list(ASTNodeList * list, int indent)
+{
+    ASTNodeList * current = list;
 
-//     while (current != NULL) 
-//     {
-//         display_ast(current->statement, indent);
-//         current = current->next;
-//     }
-// }
+    while (current != NULL)
+    {
+        display_ast(current->statement, indent);
+        current = current->next;
+    }
+}

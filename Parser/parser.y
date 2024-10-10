@@ -8,7 +8,7 @@
     #include "../include/symbol_table.h"
     #include "../include/ast.h"
     
-    #define YYDEBUG 1 
+    #define YYDEBUG 1
 
     extern FILE * yyin; /* for printing to file */
     extern int yydebug; /* for debugging mode   */
@@ -25,12 +25,14 @@
     ASTNodeList * list; /* ASTNodeList pointers       */
 }
 
+
 /* Keyword tokens */
 %token <node> KW_TRUE KW_FALSE
 %token <nullval> KW_NULL
-%token KW_IF KW_ELSE KW_ELIF KW_INT 
+%token KW_IF KW_ELSE KW_ELIF KW_INT
 %token KW_FLOAT KW_BOOL KW_STR KW_RETURN
 %token KW_FUNCTION KW_PROCEDURE KW_INCLUDE
+
 
 /* Operator tokens */
 %token <node> INTEGER_LITERAL
@@ -46,26 +48,27 @@
 %token OP_AUG_PLUS OP_AUG_MINUS OP_AUG_MULT OP_AUG_DIV OP_AUG_MOD
 
 
+%type <list>    PROGRAM
+%type <list>    STATEMENTS
 %type <node>    INT_EXP
 %type <node>    BOOL_EXP
 %type <node>    FLOAT_EXP
 %type <node>    STRING_EXP
-
-%type <list>    PROGRAM
-%type <list>    STATEMENTS
+%type <node>    DECLARATION_STATEMENT
+%type <node>    ASSIGNMENT_STATEMENT
 %type <node>    EXPRESSION
-%type <node>    BLOCK
 %type <node>    IF_STATEMENT
 %type <node>    STATEMENT
 %type <node>    ELIF_PART
 %type <node>    ELSE_PART
-%type <node>    DECLARATION_STATEMENT
-%type <node>    ASSIGNMENT_STATEMENT
+%type <node>    BLOCK
 
+
+/* Operators precedences */
 %right OP_ASSIGNMENT
 %right OP_AUG_PLUS OP_AUG_MINUS
 %right OP_AUG_MULT OP_AUG_DIV OP_AUG_MOD
-%left  OP_OR 
+%left  OP_OR
 %left  OP_AND
 %right OP_NOT
 %left  OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ OP_OPEN_ANGLE OP_CLOSE_ANGLE
@@ -77,18 +80,25 @@
 
 %%
     PROGRAM:
-                                { $$ = NULL; /* Empty program */        }  
+            /* Empty program */ { $$ = NULL;                            }
         |   PROGRAM STATEMENTS  { $$ = merge_statement_lists($1, $2);   }
         |   PROGRAM NEWLINE     { $$ = $1;                              }
         ;
 
     STATEMENTS:
-            STATEMENT                           { $$ = create_statement_list($1);   }
-        |   STATEMENTS OP_SEMICOLON STATEMENT   { $$ = add_statement_list($1, $3);  }
+            STATEMENT               { $$ = create_statement_list($1);   }
+        |   STATEMENTS STATEMENT    { $$ = add_statement_list($1, $2);  }
         ;
 
     BLOCK:
             OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY { $$ = new_block_node($2); }
+        ;
+
+    STATEMENT:
+            EXPRESSION OP_SEMICOLON     { $$ = $1; }
+        |   DECLARATION_STATEMENT       { $$ = $1; }
+        |   ASSIGNMENT_STATEMENT        { $$ = $1; }
+        |   IF_STATEMENT                { $$ = $1; }
         ;
 
     IF_STATEMENT:
@@ -97,23 +107,13 @@
         |   KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK           { $$ = new_if_node($3, $5, NULL); }
         ;
 
-
     ELIF_PART:
             KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK ELIF_PART { $$ = new_if_node($3, $5, $6);     }
-        |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK ELSE_PART { $$ = new_if_node($3, $5, $6);     }
         |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK           { $$ = new_if_node($3, $5, NULL);   }
         ;
 
-
     ELSE_PART:
             KW_ELSE BLOCK { $$ = $2; }
-        ;
-
-    STATEMENT:
-            EXPRESSION OP_SEMICOLON     { $$ = $1; }
-        |   DECLARATION_STATEMENT       { $$ = $1; }
-        |   ASSIGNMENT_STATEMENT        { $$ = $1; }
-        |   IF_STATEMENT                { $$ = $1; }
         ;
 
     DECLARATION_STATEMENT:
@@ -128,26 +128,26 @@
         |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
         |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
         |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
-        |   IDENTIFIER OP_ASSIGNMENT EXPRESSION                         { $$ = new_assignment_node($1, $3); }
-        
+        |   IDENTIFIER OP_ASSIGNMENT EXPRESSION          OP_SEMICOLON   { $$ = new_assignment_node($1, $3); }
+
         /*-------------------------------------------------
             SYNOPSIS for Augmented Arithmetic Operators:
 
-            expr1 _augmented_op_ expr2; 
+            expr1 _augmented_op_ expr2;
             will be evaluated as
             expr1 = expr1 _op_ expr2;
             (a += b;) --> (a = a + b;)
         -------------------------------------------------*/
 
-        |   EXPRESSION OP_AUG_PLUS  EXPRESSION  { $$ = new_augmented_assignment_node(AST_PLUS,     $1, $3); }
-        |   EXPRESSION OP_AUG_MINUS EXPRESSION  { $$ = new_augmented_assignment_node(AST_MINUS,    $1, $3); }
-        |   EXPRESSION OP_AUG_MULT  EXPRESSION  { $$ = new_augmented_assignment_node(AST_MULTIPLY, $1, $3); }
-        |   EXPRESSION OP_AUG_DIV   EXPRESSION  { $$ = new_augmented_assignment_node(AST_DIVIDE,   $1, $3); }
-        |   EXPRESSION OP_AUG_MOD   EXPRESSION  { $$ = new_augmented_assignment_node(AST_MODULO,   $1, $3); }
+        |   EXPRESSION OP_AUG_PLUS  EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_PLUS,     $1, $3); }
+        |   EXPRESSION OP_AUG_MINUS EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_MINUS,    $1, $3); }
+        |   EXPRESSION OP_AUG_MULT  EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_MULTIPLY, $1, $3); }
+        |   EXPRESSION OP_AUG_DIV   EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_DIVIDE,   $1, $3); }
+        |   EXPRESSION OP_AUG_MOD   EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_MODULO,   $1, $3); }
         ;
 
     EXPRESSION:
-            OP_OPEN_P EXPRESSION OP_CLOSE_P { $$ = $2; }   
+            OP_OPEN_P EXPRESSION OP_CLOSE_P { $$ = $2; }
         |   INT_EXP                         { $$ = $1; } /* INTEGER, as INT_EXP   */
         |   FLOAT_EXP                       { $$ = $1; } /* FLOAT, as FLOAT_EXP   */
         |   BOOL_EXP                        { $$ = $1; } /* BOOLEAN, as BOOL_EXP  */
@@ -163,34 +163,33 @@
         /*-----------------------------------------------------------------
             When we define both unary and binary - operators, Bison may
             experience ambiguity due to the different uses of this symbol.
-            Using %prec, we can resolve this ambiguity by assigning a 
+            Using %prec, we can resolve this ambiguity by assigning a
             special precedence to the unary minus operator.
         -----------------------------------------------------------------*/
 
-        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   { $$ = new_unary_op(AST_MINUS, $2); }
-
-        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  { $$ = new_binary_op(AST_LESS_THAN,     $1, $3); }
-        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  { $$ = new_binary_op(AST_GREATER_THAN,  $1, $3); }
-        |   EXPRESSION OP_EQ_LESS       EXPRESSION  { $$ = new_binary_op(AST_LESS_EQUAL,    $1, $3); }
-        |   EXPRESSION OP_EQ_GRE        EXPRESSION  { $$ = new_binary_op(AST_GREATER_EQUAL, $1, $3); }
-        |   EXPRESSION OP_IS_EQ         EXPRESSION  { $$ = new_binary_op(AST_EQUAL,         $1, $3); }
-        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3); }
-        |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3);  }
-        |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3);   }
-        |   OP_NOT                      EXPRESSION  { $$ = new_unary_op (AST_NOT, $2);      }                                                                                                                                                                                              
+        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   { $$ = new_unary_op (AST_MINUS, $2);                }
+        |   OP_NOT                      EXPRESSION  { $$ = new_unary_op (AST_NOT, $2);                  }
+        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  { $$ = new_binary_op(AST_LESS_THAN,     $1, $3);    }
+        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  { $$ = new_binary_op(AST_GREATER_THAN,  $1, $3);    }
+        |   EXPRESSION OP_EQ_LESS       EXPRESSION  { $$ = new_binary_op(AST_LESS_EQUAL,    $1, $3);    }
+        |   EXPRESSION OP_EQ_GRE        EXPRESSION  { $$ = new_binary_op(AST_GREATER_EQUAL, $1, $3);    }
+        |   EXPRESSION OP_IS_EQ         EXPRESSION  { $$ = new_binary_op(AST_EQUAL,         $1, $3);    }
+        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3);    }
+        |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3);              }
+        |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3);               }
         ;
 
     INT_EXP:
             INTEGER_LITERAL { $$ = $1; }
         ;
 
-    BOOL_EXP:
-            KW_TRUE  { $$ = $1; }  /* true  -> 1, from lexer */
-        |   KW_FALSE { $$ = $1; }  /* false -> 0, from lexer */
-        ;
-
     FLOAT_EXP:
             FLOAT_LITERAL { $$ = $1; }
+        ;
+
+    BOOL_EXP:
+            KW_TRUE  { $$ = $1; }
+        |   KW_FALSE { $$ = $1; }
         ;
 
     STRING_EXP:
@@ -213,9 +212,17 @@ int main(int argc, char * argv[])
     {
         printf("Type (ctrl+c) for exit\n");
 
+        ASTNode * root = NULL;
+
         yyparse();
         /* cleaning input */
         yyclearin;
+
+        if (root)
+        {
+            printf("\nDisplaying AST:\n");
+            display_ast(root, 0);
+        }
     }
 
     else if (argc == 2)
@@ -227,7 +234,15 @@ int main(int argc, char * argv[])
             printf("File not found\n");
             return 0;
         }
+        ASTNode * root = NULL;
+
         yyparse();
+
+        if (root)
+        {
+            printf("\nDisplaying AST:\n");
+            display_ast(root, 0);
+        }
     }
     
     else
@@ -238,3 +253,4 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
+

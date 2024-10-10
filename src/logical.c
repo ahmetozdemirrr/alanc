@@ -8,7 +8,7 @@
 /* Convert boolean values to integers */
 int bool_to_int(int boolval)
 {
-    return boolval ? 1 : 0;
+	return boolval ? 1 : 0;
 }
 
 /* dynamic_epsilon: Calculate dynamic epsilon based on the magnitude of the values */
