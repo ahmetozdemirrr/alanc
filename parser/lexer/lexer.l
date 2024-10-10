@@ -5,7 +5,7 @@
     // local includes
     #include <variables.h>
     #include <ast.h>
-    #include "parser.tab.h" /* BİSON generates this file */
+    #include "../parser/parser.tab.h" /* BİSON generates this file */
 
     int yycolumn = 1;
 %}

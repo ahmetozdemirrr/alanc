@@ -17,10 +17,10 @@ INTERNAL_LIBS = -lfl -lm $(LDLIBS)
 INTERNAL_YACCFLAGS = $(YACCFLAGS)
 
 # Variables
-LEXER_SOURCE = parser/lexer.l
-LEXER_OUTPUT = parser/lex.yy.c
-LEXER_HEADER = parser/lex.yy.h
-LEXER_OBJECT = parser/lex.yy.o
+LEXER_SOURCE = parser/lexer/lexer.l
+LEXER_OUTPUT = parser/lexer/lex.yy.c
+LEXER_HEADER = parser/lexer/lex.yy.h
+LEXER_OBJECT = parser/lexer/lex.yy.o
 
 PARSER_SOURCE = parser/parser.y
 PARSER_OUTPUT = parser/parser.tab.c
