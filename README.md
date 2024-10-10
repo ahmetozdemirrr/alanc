@@ -29,9 +29,11 @@ Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. 
 - **Görevi**: Dilin makine koduna derlenmesi ve optimize edilmesi.
 - **Sorumluluk**: Düşük seviyede kod üretilmesini sağlayacak. LLVM, dilin arka ucunda çalışarak derleme ve optimizasyon yapacak.
 
-### 4. **CMake**
-- **Görevi**: Derleme sistemini yönetmek.
-- **Sorumluluk**: Flex, Bison ve LLVM ile birlikte çalışarak projenin derleme aşamalarını yönetecek.
+### 4. **Make**
+- **Görevi**: Projenin derlenmesi, kurulması ve test edilmesi için kontrol
+  merkezi.
+- **Sorumluluk**: Projenin farklı parçalarını uygun araçlar kullanarak
+  derleyecek.
 
 ### 5. **Git**
 - **Görevi**: Versiyon kontrolü.
@@ -56,7 +58,7 @@ procedure poo()
     {
         b1 -> b2;
     }
-    
+
     else
     {
         return;
@@ -72,7 +74,7 @@ procedure main()
     poo(foo());
 
     input(Enter a number:);
-    
+
     return EXIT_SUCCESS;
 }
 
