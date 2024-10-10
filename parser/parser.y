@@ -2,11 +2,13 @@
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
-    #include "../include/utils.h"
-    #include "../include/logical.h"
-    #include "../include/variables.h"
-    #include "../include/symbol_table.h"
-    #include "../include/ast.h"
+
+    // local includes
+    #include <utils.h>
+    #include <logical.h>
+    #include <variables.h>
+    #include <symbol_table.h>
+    #include <ast.h>
     
     #define YYDEBUG 1
 
