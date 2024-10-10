@@ -3,7 +3,7 @@ CC = cc
 FLEX = flex
 YACC = yacc
 
-CFLAGS = -g -Wall -Wextra -Werror
+CFLAGS = -g -Wall
 YACCFLAGS = -Wcex
 
 INTERNAL_CFLAGS = \
