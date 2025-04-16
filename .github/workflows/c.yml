@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: install flex development files
+    - name: Install flex development files
       run: |
-      	sudo apt-get update
-      	sudo apt-get install -y libfl-dev
+        sudo apt-get update
+        sudo apt-get install -y libfl-dev
 
     - uses: actions/checkout@v4
 
