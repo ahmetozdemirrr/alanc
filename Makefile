@@ -71,7 +71,9 @@ test: $(PROGRAM)
 
 # Clean generated files
 clean:
-	rm -f $(LEXER_OUTPUT) $(PARSER_OUTPUT) $(PARSER_HEADER) $(LEXER_HEADER) $(PROGRAM) src/*.o Lexer/*.o Parser/*.o
+	rm -f $(LEXER_HEADER) $(LEXER_OBJECT) $(LEXER_OUTPUT)
+	rm -f $(PARSER_HEADER) $(PARSER_OBJECT) $(PARSER_OUTPUT)
+	rm -f $(PROGRAM) src/*.o
 
 # Run parser
 run: $(PROGRAM)
