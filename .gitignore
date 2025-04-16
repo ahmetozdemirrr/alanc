@@ -1,4 +1,4 @@
 /alanc
 *.o
-parser/*.yy.*
+parser/lexer/*.yy.*
 parser/*.tab.*
