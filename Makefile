@@ -29,21 +29,21 @@ PARSER_OBJECT = parser/parser.tab.o
 
 PROGRAM = alanc
 OBJECTS = \
-      src/logical.o \
-      src/symbol_table.o \
-      src/utils.o \
-      src/variables.o \
-      src/ast.o \
-      $(LEXER_OBJECT) \
-      $(PARSER_OBJECT)
+	src/logical.o \
+	src/symbol_table.o \
+	src/utils.o \
+	src/variables.o \
+	src/ast.o \
+	$(LEXER_OBJECT) \
+	$(PARSER_OBJECT)
 HEADERS = \
-	  include/logical.h \
-	  include/symbol_table.h \
-	  include/utils.h \
-	  include/variables.h \
-	  include/ast.h \
-	  $(LEXER_HEADER) \
-	  $(PARSER_HEADER)
+	include/logical.h \
+	include/symbol_table.h \
+	include/utils.h \
+	include/variables.h \
+	include/ast.h \
+	$(LEXER_HEADER) \
+	$(PARSER_HEADER)
 
 TEST_FILE = tests/test.alan
 
