@@ -1,42 +1,25 @@
-include standart.ALan
-
-function foo(int a, float b)
-{
-    if (a < 0)
-    {
-        return a;
-    }
-    return (a * (foo(a - 3, b + 3));
-}
-
-procedure poo()
-{
-    int b1 = 3;
-    int * b2;
-    int b3 = true;
-
-    if (b3)
-    {
-        b1 -> b2;
-    }
-    
-    else
-    {
-        return;
-    }
-
-    print(Procedure end!);
-}
-
-procedure main()
-{
-    int array[] = {2, 3, 4};
-
-    poo(foo());
-
-    input(Enter a number:);
-    
-    return EXIT_SUCCESS;
-}
 
 # This is a comment and this is a expression ; x = y + 5 (but in a comment line)
+
+bool a = true;
+bool b = false;
+
+int number_1;
+int number_2;
+
+if (a and b)
+{
+    if (number_1 + number_2 < 0){
+        number_1 + number_2;
+    }
+}
+
+elif (a or b)
+{
+    number_1 - number_2;
+}
+
+else
+{
+    number_1 * number_2;
+}

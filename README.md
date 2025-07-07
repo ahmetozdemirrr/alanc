@@ -6,7 +6,7 @@
 Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. Bu araçlar dilin lexik analizinden, parçacık üretimine, derlenmesine ve optimizasyonuna kadar tüm aşamalarda kullanılacaktır.
 
 ## Amaç ve önemli özellikler
-- Basit ve hızlı bir dil modeli.
+- Basit ve derlenebilen bir dil modeli.
 - Statik tipleme, fonksiyonel ve logic özellikler.
 - Türler açısından sadelik
 - Belleğe erişimli

@@ -3,30 +3,31 @@
     #include <string.h>
     #include <stdlib.h>
 
-    // local includes
+    /* local includes */
     #include <utils.h>
     #include <logical.h>
     #include <variables.h>
     #include <symbol_table.h>
     #include <ast.h>
-    
+
+    ASTNodeList * program_root = NULL;
+
     #define YYDEBUG 1
 
-    extern FILE * yyin; /* for printing to file */
-    extern int yydebug; /* for debugging mode   */
-%}  
+    extern FILE * yyin;
+    extern int yydebug;
+%}
 
-%union 
+%union
 {
-    int    intval;      /* for Integer types          */
-    float  floatval;    /* for Float types            */
-    char * string;      /* for String types           */
-    int    boolean;     /* for Boolean types (0 or 1) */
-    void * nullval;     /* for Null                   */
-    ASTNode * node;     /* ASTNode pointers           */
-    ASTNodeList * list; /* ASTNodeList pointers       */
+    int    intval;
+    float  floatval;
+    char * string;
+    int    boolean;
+    void * nullval;
+    ASTNode * node;
+    ASTNodeList * list;
 }
-
 
 /* Keyword tokens */
 %token <node> KW_TRUE KW_FALSE
@@ -34,7 +35,6 @@
 %token KW_IF KW_ELSE KW_ELIF KW_INT
 %token KW_FLOAT KW_BOOL KW_STR KW_RETURN
 %token KW_FUNCTION KW_PROCEDURE KW_INCLUDE
-
 
 /* Operator tokens */
 %token <node> INTEGER_LITERAL
@@ -49,9 +49,8 @@
 %token OP_AND OP_OR OP_NOT OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ
 %token OP_AUG_PLUS OP_AUG_MINUS OP_AUG_MULT OP_AUG_DIV OP_AUG_MOD
 
-
 %type <list>    PROGRAM
-%type <list>    STATEMENTS
+%type <list>    STATEMENT_LIST
 %type <node>    INT_EXP
 %type <node>    BOOL_EXP
 %type <node>    FLOAT_EXP
@@ -61,10 +60,8 @@
 %type <node>    EXPRESSION
 %type <node>    IF_STATEMENT
 %type <node>    STATEMENT
-%type <node>    ELIF_PART
-%type <node>    ELSE_PART
+%type <node>    OPTIONAL_IF_TAIL
 %type <node>    BLOCK
-
 
 /* Operators precedences */
 %right OP_ASSIGNMENT
@@ -78,22 +75,24 @@
 %left  OP_MULT OP_DIV OP_MOD
 %right UNARY_MINUS
 %right OP_POW
-
+%nonassoc KW_ELSE /* for dangling else */
 
 %%
     PROGRAM:
-            /* Empty program */ { $$ = NULL;                            }
-        |   PROGRAM STATEMENTS  { $$ = merge_statement_lists($1, $2);   }
-        |   PROGRAM NEWLINE     { $$ = $1;                              }
+            /* Empty program */   { program_root = NULL; }
+        |   STATEMENT_LIST        { $$ = $1;  program_root = $$; }
         ;
 
-    STATEMENTS:
-            STATEMENT               { $$ = create_statement_list($1);   }
-        |   STATEMENTS STATEMENT    { $$ = add_statement_list($1, $2);  }
+    STATEMENT_LIST:
+            STATEMENT                       { $$ = create_statement_list($1); }
+        |   STATEMENT STATEMENT_LIST        { $$ = add_statement_list($2, $1); }
+        |   NEWLINE STATEMENT_LIST          { $$ = $2; }
+        |   NEWLINE                         { $$ = NULL; }
         ;
 
     BLOCK:
-            OP_OPEN_CURLY STATEMENTS OP_CLOSE_CURLY { $$ = new_block_node($2); }
+            OP_OPEN_CURLY STATEMENT_LIST OP_CLOSE_CURLY { $$ = new_block_node($2); }
+        |   OP_OPEN_CURLY OP_CLOSE_CURLY                { $$ = new_block_node(NULL); }
         ;
 
     STATEMENT:
@@ -104,37 +103,33 @@
         ;
 
     IF_STATEMENT:
-            KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK ELIF_PART { $$ = new_if_node($3, $5, $6);   }
-        |   KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK ELSE_PART { $$ = new_if_node($3, $5, $6);   }
-        |   KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK           { $$ = new_if_node($3, $5, NULL); }
+            KW_IF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK OPTIONAL_IF_TAIL { $$ = new_if_node($3, $5, $6); }
         ;
 
-    ELIF_PART:
-            KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK ELIF_PART { $$ = new_if_node($3, $5, $6);     }
-        |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK           { $$ = new_if_node($3, $5, NULL);   }
-        ;
-
-    ELSE_PART:
-            KW_ELSE BLOCK { $$ = $2; }
+    OPTIONAL_IF_TAIL:
+            /* empty */ { $$ = NULL; }
+        |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK OPTIONAL_IF_TAIL { $$ = new_if_node($3, $5, $6); }
+        |   KW_ELSE BLOCK { $$ = $2; }
         ;
 
     DECLARATION_STATEMENT:
-            KW_INT   IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_integer_literal(0));   }
-        |   KW_FLOAT IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_float_literal(0.0));   }
-        |   KW_BOOL  IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_bool_literal(0));      }
-        |   KW_STR   IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_string_literal(""));   }
+            /* only declaration */
+            KW_INT   IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_integer_literal(0)); }
+        |   KW_FLOAT IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_float_literal(0.0)); }
+        |   KW_BOOL  IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_bool_literal(0));    }
+        |   KW_STR   IDENTIFIER OP_SEMICOLON    { $$ = new_variable_node($2, new_string_literal("")); }
+            /* declaration with assignment */
+        |   KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_variable_node($2, $4); }
+        |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_variable_node($2, $4); }
+        |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_variable_node($2, $4); }
+        |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_variable_node($2, $4); }
         ;
 
     ASSIGNMENT_STATEMENT:
-            KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
-        |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
-        |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
-        |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($2, $4); }
-        |   IDENTIFIER OP_ASSIGNMENT EXPRESSION          OP_SEMICOLON   { $$ = new_assignment_node($1, $3); }
+            IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($1, $3); }
 
         /*-------------------------------------------------
             SYNOPSIS for Augmented Arithmetic Operators:
-
             expr1 _augmented_op_ expr2;
             will be evaluated as
             expr1 = expr1 _op_ expr2;
@@ -154,8 +149,8 @@
         |   FLOAT_EXP                       { $$ = $1; } /* FLOAT, as FLOAT_EXP   */
         |   BOOL_EXP                        { $$ = $1; } /* BOOLEAN, as BOOL_EXP  */
         |   STRING_EXP                      { $$ = $1; } /* STRING, as STRING_EXP */
-        |   IDENTIFIER                      { $$ = new_variable_node($1, NULL); } /* The second parameter is NULL, because there is only the variable name, no value assignment */
-        |   EXPRESSION OP_PLUS EXPRESSION   { $$ = new_binary_op(AST_PLUS,     $1, $3); }
+        |   IDENTIFIER                      { $$ = new_identifier_node($1); } /* Variable reference */
+        |   EXPRESSION OP_PLUS  EXPRESSION  { $$ = new_binary_op(AST_PLUS,     $1, $3); }
         |   EXPRESSION OP_MINUS EXPRESSION  { $$ = new_binary_op(AST_MINUS,    $1, $3); }
         |   EXPRESSION OP_MULT  EXPRESSION  { $$ = new_binary_op(AST_MULTIPLY, $1, $3); }
         |   EXPRESSION OP_DIV   EXPRESSION  { $$ = new_binary_op(AST_DIVIDE,   $1, $3); }
@@ -169,16 +164,16 @@
             special precedence to the unary minus operator.
         -----------------------------------------------------------------*/
 
-        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   { $$ = new_unary_op (AST_MINUS, $2);                }
-        |   OP_NOT                      EXPRESSION  { $$ = new_unary_op (AST_NOT, $2);                  }
-        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  { $$ = new_binary_op(AST_LESS_THAN,     $1, $3);    }
-        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  { $$ = new_binary_op(AST_GREATER_THAN,  $1, $3);    }
-        |   EXPRESSION OP_EQ_LESS       EXPRESSION  { $$ = new_binary_op(AST_LESS_EQUAL,    $1, $3);    }
-        |   EXPRESSION OP_EQ_GRE        EXPRESSION  { $$ = new_binary_op(AST_GREATER_EQUAL, $1, $3);    }
-        |   EXPRESSION OP_IS_EQ         EXPRESSION  { $$ = new_binary_op(AST_EQUAL,         $1, $3);    }
-        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3);    }
-        |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3);              }
-        |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3);               }
+        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   { $$ = new_unary_op (AST_MINUS, $2); }
+        |   OP_NOT                      EXPRESSION  { $$ = new_unary_op (AST_NOT, $2); }
+        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  { $$ = new_binary_op(AST_LESS_THAN,     $1, $3); }
+        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  { $$ = new_binary_op(AST_GREATER_THAN,  $1, $3); }
+        |   EXPRESSION OP_EQ_LESS       EXPRESSION  { $$ = new_binary_op(AST_LESS_EQUAL,    $1, $3); }
+        |   EXPRESSION OP_EQ_GRE        EXPRESSION  { $$ = new_binary_op(AST_GREATER_EQUAL, $1, $3); }
+        |   EXPRESSION OP_IS_EQ         EXPRESSION  { $$ = new_binary_op(AST_EQUAL,         $1, $3); }
+        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3); }
+        |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3); }
+        |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3); }
         ;
 
     INT_EXP:
@@ -201,52 +196,46 @@
 
 int main(int argc, char * argv[])
 {
-
 #ifdef YYDEBUG
     yydebug = 1;
 #else
     yydebug = 0;
 #endif
+yydebug = 0;
 
     symbol_table = create_symbol_table();
 
     if (argc == 1)
     {
         printf("Type (ctrl+c) for exit\n");
-
-        ASTNode * root = NULL;
-
         yyparse();
-        /* cleaning input */
-        yyclearin;
 
-        if (root)
+        if (program_root)
         {
             printf("\nDisplaying AST:\n");
-            display_ast(root, 0);
+            display_ast_list(program_root, 0);
         }
+        yyclearin;
     }
 
     else if (argc == 2)
     {
         yyin = fopen(argv[1], "r");
-
         if (yyin == NULL)
         {
             printf("File not found\n");
             return 0;
         }
-        ASTNode * root = NULL;
 
-        yyparse();
-
-        if (root)
+        if (yyparse() == 0 && program_root)
         {
             printf("\nDisplaying AST:\n");
-            display_ast(root, 0);
+            display_ast_list(program_root, 0);
         }
+
+        fclose(yyin);
     }
-    
+
     else
     {
         printf("Too many arguments\n");
@@ -255,4 +244,3 @@ int main(int argc, char * argv[])
     }
     return 0;
 }
-

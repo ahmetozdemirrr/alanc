@@ -226,7 +226,6 @@ return              {
 \n                  {
                         yycolumn += yyleng;
                         yycolumn = 1;
-                        return NEWLINE;
                     }
 true                {
                         yycolumn += yyleng;

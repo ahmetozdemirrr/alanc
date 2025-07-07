@@ -7,48 +7,48 @@
 
 typedef enum 
 {
-    AST_PROGRAM,
-    AST_STATEMENTS,
-    
-    AST_INT_LITERAL,  
-    AST_FLOAT_LITERAL,  
-    AST_STRING_LITERAL,
-    AST_BOOL_LITERAL,
-    AST_NULL_LITERAL,
-    
-    AST_VARIABLE_DECLARATION, 
-    AST_ASSIGNMENT_STATEMENT, 
-    AST_IDENTIFIER,     
-    
-    AST_PLUS,            
-    AST_MINUS,         
-    AST_MULTIPLY,    
-    AST_DIVIDE,                 
-    AST_MODULO,          
-    AST_POWER,        
-    AST_AND,             
-    AST_OR, 
-    AST_NOT,  
-    
-    AST_LESS_THAN,    
-    AST_GREATER_THAN,  
-    AST_LESS_EQUAL,        
-    AST_GREATER_EQUAL,   
-    AST_EQUAL,             
-    AST_NOT_EQUAL,
-    
-    AST_IF_STATEMENT,  
-    AST_ELIF_STATEMENT,  
-    AST_ELSE_STATEMENT, 
-    
-    AST_FUNCTION_DECLARATION,
-    AST_FUNCTION_CALL,
-    
-    AST_PROCEDURE_DECLARATION,
-    AST_PROCEDURE_CALL,
+	AST_PROGRAM,
+	AST_STATEMENTS,
 
-    AST_BLOCK,
-    AST_EXPRESSION
+	AST_INT_LITERAL,
+	AST_FLOAT_LITERAL,
+	AST_STRING_LITERAL,
+	AST_BOOL_LITERAL,
+	AST_NULL_LITERAL,
+
+	AST_VARIABLE_DECLARATION,
+	AST_ASSIGNMENT_STATEMENT,
+	AST_IDENTIFIER,
+
+	AST_PLUS,
+	AST_MINUS,
+	AST_MULTIPLY,
+	AST_DIVIDE,
+	AST_MODULO,
+	AST_POWER,
+	AST_AND,
+	AST_OR,
+	AST_NOT,
+
+	AST_LESS_THAN,
+	AST_GREATER_THAN,
+	AST_LESS_EQUAL,
+	AST_GREATER_EQUAL,
+	AST_EQUAL,
+	AST_NOT_EQUAL,
+
+	AST_IF_STATEMENT,
+	AST_ELIF_STATEMENT,
+	AST_ELSE_STATEMENT,
+
+	AST_FUNCTION_DECLARATION,
+	AST_FUNCTION_CALL,
+
+	AST_PROCEDURE_DECLARATION,
+	AST_PROCEDURE_CALL,
+
+	AST_BLOCK,
+	AST_EXPRESSION
 } 
 ASTNodeType;
 
@@ -57,9 +57,9 @@ struct ASTNode;
 typedef union
 {
 	int intValue;
-    float floatValue;
-    char * stringValue;
-    int boolValue;
+	float floatValue;
+	char * stringValue;
+	int boolValue;
 }
 LiteralValue;
 
@@ -67,7 +67,7 @@ LiteralValue;
 /* Structure for unary operation nodes */
 typedef struct
 {
-    struct ASTNode * operand;
+	struct ASTNode * operand;
 } 
 UnaryOpNode;
 
@@ -112,18 +112,18 @@ ASTNodeList;
 /* Main AST node structure */
 typedef struct ASTNode 
 {
-    ASTNodeType type;
+	ASTNodeType type;
 
-    union 
-    {
-        LiteralValue 	 literal;
-        BinaryOpNode 	binaryOp;
-        UnaryOpNode 	 unaryOp;
-        IfNode 			  ifNode;
-        VariableNode 	variable;
-        ASTNodeList * statements;
-    } 
-    data;
+	union
+	{
+		LiteralValue 	 literal;
+		BinaryOpNode 	binaryOp;
+		UnaryOpNode 	 unaryOp;
+		IfNode 			  ifNode;
+		VariableNode 	variable;
+		ASTNodeList * statements;
+	}
+	data;
 } 
 ASTNode;
 
@@ -132,6 +132,7 @@ ASTNode * new_integer_literal(int value);
 ASTNode * new_float_literal(float value);
 ASTNode * new_string_literal(char * value);
 ASTNode * new_bool_literal(int value);
+ASTNode * new_identifier_node(char * variableName);
 ASTNode * new_binary_op(ASTNodeType type, ASTNode * left, ASTNode * right);
 ASTNode * new_unary_op(ASTNodeType type, ASTNode * operand);
 ASTNode * new_if_node(ASTNode * condition, ASTNode * thenBranch, ASTNode * elseBranch);
@@ -146,9 +147,7 @@ ASTNodeList * new_statement_list(ASTNode * first, ASTNode * second);
 ASTNodeList * merge_statement_lists(ASTNodeList * list1, ASTNodeList * list2);
 
 void free_ast_node(ASTNode * node);
-void display_ast(ASTNode * node, int indent);
+void display_ast(ASTNode * node, int indent, int is_last);
 void display_ast_list(ASTNodeList * list, int indent);
 
 #endif /* AST_H */
-
-
