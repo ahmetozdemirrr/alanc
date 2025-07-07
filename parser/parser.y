@@ -10,7 +10,7 @@
     #include <symbol_table.h>
     #include <ast.h>
 
-    ASTNodeList * program_root = NULL;
+    ASTNode * program_root = NULL;
 
     #define YYDEBUG 1
 
@@ -49,7 +49,7 @@
 %token OP_AND OP_OR OP_NOT OP_EQ_LESS OP_EQ_GRE OP_IS_EQ OP_ISNT_EQ
 %token OP_AUG_PLUS OP_AUG_MINUS OP_AUG_MULT OP_AUG_DIV OP_AUG_MOD
 
-%type <list>    PROGRAM
+%type <node>    PROGRAM
 %type <list>    STATEMENT_LIST
 %type <node>    INT_EXP
 %type <node>    BOOL_EXP
@@ -79,8 +79,8 @@
 
 %%
     PROGRAM:
-            /* Empty program */   { program_root = NULL; }
-        |   STATEMENT_LIST        { $$ = $1;  program_root = $$; }
+            /* Empty program */  { $$ = new_program_node(NULL); program_root = $$; }
+        |   STATEMENT_LIST       { $$ = new_program_node($1); program_root = $$; }
         ;
 
     STATEMENT_LIST:
@@ -213,7 +213,7 @@ yydebug = 0;
         if (program_root)
         {
             printf("\nDisplaying AST:\n");
-            display_ast_list(program_root, 0);
+            display_ast(program_root, 0, 1);
         }
         yyclearin;
     }
@@ -230,7 +230,7 @@ yydebug = 0;
         if (yyparse() == 0 && program_root)
         {
             printf("\nDisplaying AST:\n");
-            display_ast_list(program_root, 0);
+            display_ast(program_root, 0, 1);
         }
 
         fclose(yyin);

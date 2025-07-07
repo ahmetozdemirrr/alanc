@@ -140,6 +140,7 @@ ASTNode * new_block_node(ASTNodeList * statements);
 ASTNode * new_variable_node(char * variableName, ASTNode * expression);
 ASTNode * new_assignment_node(char * variableName, ASTNode * expression);
 ASTNode * new_augmented_assignment_node(ASTNodeType type, ASTNode * variable, ASTNode * expression);
+ASTNode * new_program_node(ASTNodeList * statements);
 
 ASTNodeList * add_statement_list(ASTNodeList * list1, ASTNode * statement);
 ASTNodeList * create_statement_list(ASTNode * statement);

@@ -2,6 +2,13 @@
 
 #include <ast.h>
 
+ASTNode * new_program_node(ASTNodeList * statements)
+{
+    ASTNode * node = new_ast_node(AST_PROGRAM);
+    node->data.statements = statements;
+    return node;
+}
+
 /* Creates a new AST node with the given type */
 ASTNode * new_ast_node(ASTNodeType type)
 {
@@ -269,6 +276,10 @@ void display_ast(ASTNode * node, int indent, int is_last) {
     print_prefix(indent, is_last);
 
     switch (node->type) {
+    	case AST_PROGRAM:
+		    printf("Program\n");
+		    display_ast_list(node->data.statements, indent + 1);
+		    break;
         case AST_BLOCK:
             printf("Block\n");
             display_ast_list(node->data.statements, indent + 1);
