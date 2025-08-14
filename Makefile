@@ -6,11 +6,12 @@ YACC = yacc
 CFLAGS = -g -Wall
 YACCFLAGS = -Wcex
 
-INTERNAL_CFLAGS = \
-	-std=gnu99 \
-	-D_GNU_SOURCE \
-	-D_FILE_OFFSET_BITS=64 \
-	-Iinclude \
+INTERNAL_CFLAGS = 		\
+	-std=gnu99 		\
+	-D_GNU_SOURCE 		\
+	-D_FILE_OFFSET_BITS=64 	\
+	-Iinclude 		\
+	-Icommon/include 	\
 	$(CFLAGS)
 INTERNAL_LDFLAGS = $(LDFLAGS)
 INTERNAL_LIBS = -lfl -lm $(LDLIBS)
@@ -28,21 +29,19 @@ PARSER_HEADER = parser/parser.tab.h
 PARSER_OBJECT = parser/parser.tab.o
 
 PROGRAM = alanc
-OBJECTS = \
-	src/logical.o \
-	src/symbol_table.o \
-	src/utils.o \
-	src/variables.o \
-	src/ast.o \
-	$(LEXER_OBJECT) \
+OBJECTS = 			\
+	src/symbol_table.o 	\
+	src/utils.o 		\
+	src/ast.o 		\
+	common/src/hash_table.o \
+	$(LEXER_OBJECT) 	\
 	$(PARSER_OBJECT)
-HEADERS = \
-	include/logical.h \
-	include/symbol_table.h \
-	include/utils.h \
-	include/variables.h \
-	include/ast.h \
-	$(LEXER_HEADER) \
+HEADERS = 				\
+	include/symbol_table.h 		\
+	include/utils.h 		\
+	include/ast.h 			\
+	common/include/hash_table.h 	\
+	$(LEXER_HEADER) 		\
 	$(PARSER_HEADER)
 
 TEST_FILE = tests/test.alan
@@ -69,12 +68,6 @@ $(PARSER_OUTPUT) $(PARSER_HEADER): $(PARSER_SOURCE)
 test: $(PROGRAM)
 	./$(PROGRAM) $(TEST_FILE)
 
-# Clean generated files
-clean:
-	rm -f $(LEXER_HEADER) $(LEXER_OBJECT) $(LEXER_OUTPUT)
-	rm -f $(PARSER_HEADER) $(PARSER_OBJECT) $(PARSER_OUTPUT)
-	rm -f $(PROGRAM) src/*.o
-
 # Run parser
 run: $(PROGRAM)
 	./$(PROGRAM)
@@ -82,5 +75,11 @@ run: $(PROGRAM)
 # Valgrind memory check
 memcheck: $(PROGRAM)
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(PROGRAM)
+
+# Clean generated files
+clean:
+	rm -f $(LEXER_HEADER) $(LEXER_OBJECT) $(LEXER_OUTPUT)
+	rm -f $(PARSER_HEADER) $(PARSER_OBJECT) $(PARSER_OUTPUT)
+	rm -f $(PROGRAM) src/*.o common/src/*.o
 
 .PHONY: all clean run test memcheck

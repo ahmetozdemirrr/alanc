@@ -8,11 +8,11 @@ insert_final_newline = true
 
 [*.{c,h}]
 indent_style = tab
-indent_size = 8
+indent_size = 4
 
 [Makefile]
 indent_style = tab
-indent_size = 8
+indent_size = 4
 
 [*.yml]
 indent_style = space
