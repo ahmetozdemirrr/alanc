@@ -1,0 +1,90 @@
+
+# This is a comment and this is a expression ; x = y + 5 (but in a comment line)
+
+bool a = true;
+bool b = false;
+
+int number_1;
+int number_2;
+
+if (a and b)
+{
+    if (number_1 + number_2 < 0){
+        number_1 + number_2;
+    }
+}
+
+elif (a or b)
+{
+	for (int i = 0; i < 10; i += 1)
+	{
+    	number_1 - number_2;
+	}
+}
+
+else
+{
+    number_1 * number_2;
+}
+
+# out:
+#
+# ahmet:~/alanc$ ./alanc ./tests/loop_test.alan
+#
+# Displaying AST:
+# Program
+# ├── VarDecl: a
+#     └── Bool: true
+# ├── VarDecl: b
+#     └── Bool: false
+# ├── VarDecl: number_1
+#     └── Int: 0
+# ├── VarDecl: number_2
+#     └── Int: 0
+# └── IfStatement
+#     ├── Condition:
+#         └── BinaryOp: AND
+#             ├── Identifier: a
+#             └── Identifier: b
+#     ├── Then Branch:
+#         └── Block
+#             └── IfStatement
+#                 ├── Condition:
+#                     └── BinaryOp: <
+#                         ├── BinaryOp: PLUS
+#                             ├── Identifier: number_1
+#                             └── Identifier: number_2
+#                         └── Int: 0
+#                 └── Then Branch:
+#                     └── Block
+#                         └── BinaryOp: PLUS
+#                             ├── Identifier: number_1
+#                             └── Identifier: number_2
+#     └── Else Branch:
+#         └── IfStatement
+#             ├── Condition:
+#                 └── BinaryOp: OR
+#                     ├── Identifier: a
+#                     └── Identifier: b
+#             ├── Then Branch:
+#                 └── Block
+#                     └── FOR
+#                         ├── INIT:                             ├── VarDecl: i
+#                                 └── Int: 0
+#                         ├── COND:                             ├── BinaryOp: <
+#                                 ├── Identifier: i
+#                                 └── Int: 10
+#                         ├── INCR:                             ├── BinaryOp: PLUS
+#                                 ├── Identifier: i
+#                                 └── Int: 1
+#                         └── BODY:                             └── Block
+#                                 └── BinaryOp: MINUS
+#                                     ├── Identifier: number_1
+#                                     └── Identifier: number_2
+#             └── Else Branch:
+#                 └── Block
+#                     └── BinaryOp: MULTIPLY
+#                         ├── Identifier: number_1
+#                         └── Identifier: number_2
+# ahmet:~/alanc$
+

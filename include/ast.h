@@ -41,6 +41,8 @@ typedef enum
 	AST_ELIF_STATEMENT,
 	AST_ELSE_STATEMENT,
 
+	AST_FOR_STATEMENT,
+
 	AST_FUNCTION_DECLARATION,
 	AST_FUNCTION_CALL,
 
@@ -90,6 +92,14 @@ typedef struct
 }
 IfNode;
 
+typedef struct
+{
+	struct ASTNode * initialization;
+	struct ASTNode * condition;
+	struct ASTNode * increment;
+	struct ASTNode * body;
+}
+ForNode;
 
 /* struct for variable declaration/assignment nodes */
 typedef struct 
@@ -120,6 +130,7 @@ typedef struct ASTNode
 		BinaryOpNode 	binaryOp;
 		UnaryOpNode 	 unaryOp;
 		IfNode 			  ifNode;
+		ForNode			 forNode;
 		VariableNode 	variable;
 		ASTNodeList * statements;
 	}
@@ -136,6 +147,7 @@ ASTNode * new_identifier_node(char * variableName);
 ASTNode * new_binary_op(ASTNodeType type, ASTNode * left, ASTNode * right);
 ASTNode * new_unary_op(ASTNodeType type, ASTNode * operand);
 ASTNode * new_if_node(ASTNode * condition, ASTNode * thenBranch, ASTNode * elseBranch);
+ASTNode * new_for_node(ASTNode * initialization, ASTNode * condition, ASTNode * increment, ASTNode * body);
 ASTNode * new_block_node(ASTNodeList * statements);
 ASTNode * new_variable_node(char * variableName, ASTNode * expression);
 ASTNode * new_assignment_node(char * variableName, ASTNode * expression);

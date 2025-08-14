@@ -104,6 +104,28 @@ ASTNode * new_if_node(ASTNode * condition, ASTNode * thenBranch, ASTNode * elseB
 	return node;
 }
 
+/* yeni bir 'for' döngüsü AST düğümü oluşturur */
+ASTNode * new_for_node(ASTNode * initialization,
+					   ASTNode * condition,
+					   ASTNode * increment,
+					   ASTNode * body)
+{
+    ASTNode * node = (ASTNode *)malloc(sizeof(ASTNode));
+    if (node == NULL) {
+        fprintf(stderr, "Hata: For düğümü için bellek ayrılamadı!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    node->type = AST_FOR_STATEMENT;
+
+    node->data.forNode.initialization = initialization;
+    node->data.forNode.condition = condition;
+    node->data.forNode.increment = increment;
+    node->data.forNode.body = body;
+
+    return node;
+}
+
 ASTNode * new_block_node(ASTNodeList * statements)
 {
 	ASTNode * node = new_ast_node(AST_BLOCK);
@@ -238,6 +260,13 @@ void free_ast_node(ASTNode * node)
 			free_ast_node(node->data.ifNode.elseBranch);
 			break;
 
+		case AST_FOR_STATEMENT:
+			free_ast_node(node->data.forNode.initialization);
+			free_ast_node(node->data.forNode.condition);
+			free_ast_node(node->data.forNode.increment);
+			free_ast_node(node->data.forNode.body);
+			break;
+
 		case AST_PLUS:
 		case AST_MINUS:
 		case AST_MULTIPLY:
@@ -339,6 +368,25 @@ void display_ast(ASTNode * node, int indent, int is_last) {
                 print_prefix(indent + 1, 1); printf("Else Branch:\n");
                 display_ast(node->data.ifNode.elseBranch, indent + 2, 1);
             }
+            break;
+        case AST_FOR_STATEMENT:
+            printf("FOR\n");
+
+            print_prefix(indent + 1, 0);
+            printf("INIT: ");
+            display_ast(node->data.forNode.initialization, indent + 2, 0);
+
+            print_prefix(indent + 1, 0);
+            printf("COND: ");
+            display_ast(node->data.forNode.condition, indent + 2, 0);
+
+            print_prefix(indent + 1, 0);
+            printf("INCR: ");
+            display_ast(node->data.forNode.increment, indent + 2, 0);
+
+            print_prefix(indent + 1, 1);
+            printf("BODY: ");
+            display_ast(node->data.forNode.body, indent + 2, 1);
             break;
         default:
             printf("Unknown Node Type: %d\n", node->type);

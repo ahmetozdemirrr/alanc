@@ -215,6 +215,10 @@ procedure           {
                         yycolumn += yyleng;
                         return KW_PROCEDURE;
                     }
+for                 {
+                        yycolumn += yyleng;
+                        return KW_FOR;
+                    }
 include             {
                         yycolumn += yyleng;
                         return KW_INCLUDE;

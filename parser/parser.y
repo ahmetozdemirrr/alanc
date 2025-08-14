@@ -32,7 +32,7 @@
 /* Keyword tokens */
 %token <node> KW_TRUE KW_FALSE
 %token <nullval> KW_NULL
-%token KW_IF KW_ELSE KW_ELIF KW_INT
+%token KW_IF KW_ELSE KW_ELIF KW_INT KW_FOR
 %token KW_FLOAT KW_BOOL KW_STR KW_RETURN
 %token KW_FUNCTION KW_PROCEDURE KW_INCLUDE
 
@@ -59,6 +59,10 @@
 %type <node>    ASSIGNMENT_STATEMENT
 %type <node>    EXPRESSION
 %type <node>    IF_STATEMENT
+%type <node>    LOOP
+%type <node>    EXPRESSION_OPT
+%type <node>    DECLARATION_NOSC
+%type <node>    FOR_INIT
 %type <node>    STATEMENT
 %type <node>    OPTIONAL_IF_TAIL
 %type <node>    BLOCK
@@ -100,6 +104,7 @@
         |   DECLARATION_STATEMENT       { $$ = $1; }
         |   ASSIGNMENT_STATEMENT        { $$ = $1; }
         |   IF_STATEMENT                { $$ = $1; }
+        |   LOOP                        { $$ = $1; }
         ;
 
     IF_STATEMENT:
@@ -110,6 +115,31 @@
             /* empty */ { $$ = NULL; }
         |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK OPTIONAL_IF_TAIL { $$ = new_if_node($3, $5, $6); }
         |   KW_ELSE BLOCK { $$ = $2; }
+        ;
+
+    EXPRESSION_OPT:
+            EXPRESSION    { $$ = $1;   }
+        |   /* empty */   { $$ = NULL; }
+        ;
+
+    DECLARATION_NOSC: /* Noktalı Virgülsüz Tanımlama */
+            KW_INT   IDENTIFIER OP_ASSIGNMENT EXPRESSION   { $$ = new_variable_node($2, $4); }
+        |   KW_FLOAT IDENTIFIER OP_ASSIGNMENT EXPRESSION   { $$ = new_variable_node($2, $4); }
+        |   KW_BOOL  IDENTIFIER OP_ASSIGNMENT EXPRESSION   { $$ = new_variable_node($2, $4); }
+        |   KW_STR   IDENTIFIER OP_ASSIGNMENT EXPRESSION   { $$ = new_variable_node($2, $4); }
+        ;
+
+    FOR_INIT: /* For initializer */
+            DECLARATION_NOSC        { $$ = $1; }
+        |   EXPRESSION              { $$ = $1; }
+        |   /* empty */             { $$ = NULL; }
+        ;
+
+    LOOP:
+            KW_FOR OP_OPEN_P FOR_INIT OP_SEMICOLON EXPRESSION_OPT OP_SEMICOLON EXPRESSION_OPT OP_CLOSE_P BLOCK
+            {
+                $$ = new_for_node($3, $5, $7, $9);
+            }
         ;
 
     DECLARATION_STATEMENT:
@@ -127,20 +157,6 @@
 
     ASSIGNMENT_STATEMENT:
             IDENTIFIER OP_ASSIGNMENT EXPRESSION OP_SEMICOLON   { $$ = new_assignment_node($1, $3); }
-
-        /*-------------------------------------------------
-            SYNOPSIS for Augmented Arithmetic Operators:
-            expr1 _augmented_op_ expr2;
-            will be evaluated as
-            expr1 = expr1 _op_ expr2;
-            (a += b;) --> (a = a + b;)
-        -------------------------------------------------*/
-
-        |   EXPRESSION OP_AUG_PLUS  EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_PLUS,     $1, $3); }
-        |   EXPRESSION OP_AUG_MINUS EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_MINUS,    $1, $3); }
-        |   EXPRESSION OP_AUG_MULT  EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_MULTIPLY, $1, $3); }
-        |   EXPRESSION OP_AUG_DIV   EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_DIVIDE,   $1, $3); }
-        |   EXPRESSION OP_AUG_MOD   EXPRESSION OP_SEMICOLON { $$ = new_augmented_assignment_node(AST_MODULO,   $1, $3); }
         ;
 
     EXPRESSION:
@@ -174,6 +190,19 @@
         |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3); }
         |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3); }
         |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3); }
+        /*-------------------------------------------------
+            SYNOPSIS for Augmented Arithmetic Operators:
+            expr1 _augmented_op_ expr2;
+            will be evaluated as
+            expr1 = expr1 _op_ expr2;
+            (a += b;) --> (a = a + b;)
+        -------------------------------------------------*/
+
+        |   EXPRESSION OP_AUG_PLUS  EXPRESSION { $$ = new_augmented_assignment_node(AST_PLUS,     $1, $3); }
+        |   EXPRESSION OP_AUG_MINUS EXPRESSION { $$ = new_augmented_assignment_node(AST_MINUS,    $1, $3); }
+        |   EXPRESSION OP_AUG_MULT  EXPRESSION { $$ = new_augmented_assignment_node(AST_MULTIPLY, $1, $3); }
+        |   EXPRESSION OP_AUG_DIV   EXPRESSION { $$ = new_augmented_assignment_node(AST_DIVIDE,   $1, $3); }
+        |   EXPRESSION OP_AUG_MOD   EXPRESSION { $$ = new_augmented_assignment_node(AST_MODULO,   $1, $3); }
         ;
 
     INT_EXP:
