@@ -5,16 +5,14 @@
 
     /* local includes */
     #include <utils.h>
-    #include <logical.h>
-    #include <variables.h>
     #include <symbol_table.h>
     #include <ast.h>
 
-    ASTNode * program_root = NULL;
+    ASTNode* program_root = NULL;
 
     #define YYDEBUG 1
 
-    extern FILE * yyin;
+    extern FILE* yyin;
     extern int yydebug;
 %}
 
@@ -22,11 +20,11 @@
 {
     int    intval;
     float  floatval;
-    char * string;
+    char*  string;
     int    boolean;
-    void * nullval;
-    ASTNode * node;
-    ASTNodeList * list;
+    void*  nullval;
+    ASTNode*  node;
+    ASTNodeList* list;
 }
 
 /* Keyword tokens */
@@ -84,19 +82,19 @@
 %%
     PROGRAM:
             /* Empty program */  { $$ = new_program_node(NULL); program_root = $$; }
-        |   STATEMENT_LIST       { $$ = new_program_node($1); program_root = $$; }
+        |   STATEMENT_LIST       { $$ = new_program_node($1);   program_root = $$; }
         ;
 
     STATEMENT_LIST:
-            STATEMENT                       { $$ = create_statement_list($1); }
-        |   STATEMENT STATEMENT_LIST        { $$ = add_statement_list($2, $1); }
-        |   NEWLINE STATEMENT_LIST          { $$ = $2; }
-        |   NEWLINE                         { $$ = NULL; }
+            STATEMENT                       { $$ = create_statement_list($1);   }
+        |   STATEMENT STATEMENT_LIST        { $$ = add_statement_list($2, $1);  }
+        |   NEWLINE STATEMENT_LIST          { $$ = $2;                          }
+        |   NEWLINE                         { $$ = NULL;                        }
         ;
 
     BLOCK:
-            OP_OPEN_CURLY STATEMENT_LIST OP_CLOSE_CURLY { $$ = new_block_node($2); }
-        |   OP_OPEN_CURLY OP_CLOSE_CURLY                { $$ = new_block_node(NULL); }
+            OP_OPEN_CURLY STATEMENT_LIST OP_CLOSE_CURLY { $$ = new_block_node($2);      }
+        |   OP_OPEN_CURLY OP_CLOSE_CURLY                { $$ = new_block_node(NULL);    }
         ;
 
     STATEMENT:
@@ -112,9 +110,9 @@
         ;
 
     OPTIONAL_IF_TAIL:
-            /* empty */ { $$ = NULL; }
-        |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK OPTIONAL_IF_TAIL { $$ = new_if_node($3, $5, $6); }
-        |   KW_ELSE BLOCK { $$ = $2; }
+            /* empty */                                                     { $$ = NULL;                    }
+        |   KW_ELIF OP_OPEN_P EXPRESSION OP_CLOSE_P BLOCK OPTIONAL_IF_TAIL  { $$ = new_if_node($3, $5, $6); }
+        |   KW_ELSE BLOCK                                                   { $$ = $2;                      }
         ;
 
     EXPRESSION_OPT:
@@ -130,9 +128,9 @@
         ;
 
     FOR_INIT: /* For initializer */
-            DECLARATION_NOSC        { $$ = $1; }
-        |   EXPRESSION              { $$ = $1; }
-        |   /* empty */             { $$ = NULL; }
+            DECLARATION_NOSC        { $$ = $1;      }
+        |   EXPRESSION              { $$ = $1;      }
+        |   /* empty */             { $$ = NULL;    }
         ;
 
     LOOP:
@@ -180,16 +178,16 @@
             special precedence to the unary minus operator.
         -----------------------------------------------------------------*/
 
-        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   { $$ = new_unary_op (AST_MINUS, $2); }
-        |   OP_NOT                      EXPRESSION  { $$ = new_unary_op (AST_NOT, $2); }
-        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  { $$ = new_binary_op(AST_LESS_THAN,     $1, $3); }
-        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  { $$ = new_binary_op(AST_GREATER_THAN,  $1, $3); }
-        |   EXPRESSION OP_EQ_LESS       EXPRESSION  { $$ = new_binary_op(AST_LESS_EQUAL,    $1, $3); }
-        |   EXPRESSION OP_EQ_GRE        EXPRESSION  { $$ = new_binary_op(AST_GREATER_EQUAL, $1, $3); }
-        |   EXPRESSION OP_IS_EQ         EXPRESSION  { $$ = new_binary_op(AST_EQUAL,         $1, $3); }
-        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3); }
-        |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3); }
-        |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3); }
+        |   OP_MINUS EXPRESSION %prec UNARY_MINUS   { $$ = new_unary_op (AST_MINUS, $2);                }
+        |   OP_NOT                      EXPRESSION  { $$ = new_unary_op (AST_NOT, $2);                  }
+        |   EXPRESSION OP_OPEN_ANGLE    EXPRESSION  { $$ = new_binary_op(AST_LESS_THAN,     $1, $3);    }
+        |   EXPRESSION OP_CLOSE_ANGLE   EXPRESSION  { $$ = new_binary_op(AST_GREATER_THAN,  $1, $3);    }
+        |   EXPRESSION OP_EQ_LESS       EXPRESSION  { $$ = new_binary_op(AST_LESS_EQUAL,    $1, $3);    }
+        |   EXPRESSION OP_EQ_GRE        EXPRESSION  { $$ = new_binary_op(AST_GREATER_EQUAL, $1, $3);    }
+        |   EXPRESSION OP_IS_EQ         EXPRESSION  { $$ = new_binary_op(AST_EQUAL,         $1, $3);    }
+        |   EXPRESSION OP_ISNT_EQ       EXPRESSION  { $$ = new_binary_op(AST_NOT_EQUAL,     $1, $3);    }
+        |   EXPRESSION OP_AND           EXPRESSION  { $$ = new_binary_op(AST_AND, $1, $3);              }
+        |   EXPRESSION OP_OR            EXPRESSION  { $$ = new_binary_op(AST_OR, $1, $3);               }
         /*-------------------------------------------------
             SYNOPSIS for Augmented Arithmetic Operators:
             expr1 _augmented_op_ expr2;
@@ -261,14 +259,13 @@ yydebug = 0;
             printf("\nDisplaying AST:\n");
             display_ast(program_root, 0, 1);
         }
-
         fclose(yyin);
     }
 
     else
     {
         printf("Too many arguments\n");
-        printf("Usage: ./parser or ./parser <filename>\n");
+        printf("Usage: ./alanc or ./alanc <filename>\n");
         return 0;
     }
     return 0;

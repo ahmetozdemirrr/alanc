@@ -1,18 +1,18 @@
-/* ast.c */
+/* src/frontend/src/ast.c */
 
 #include <ast.h>
 
-ASTNode * new_program_node(ASTNodeList * statements)
+ASTNode* new_program_node(ASTNodeList* statements)
 {
-    ASTNode * node = new_ast_node(AST_PROGRAM);
+    ASTNode* node = new_ast_node(AST_PROGRAM);
     node->data.statements = statements;
     return node;
 }
 
 /* Creates a new AST node with the given type */
-ASTNode * new_ast_node(ASTNodeType type)
+ASTNode* new_ast_node(ASTNodeType type)
 {
-	ASTNode * node = (ASTNode *)malloc(sizeof(ASTNode));
+	ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
 
 	if (!node)
 	{
@@ -24,36 +24,36 @@ ASTNode * new_ast_node(ASTNodeType type)
 	return node;
 }
 
-ASTNode * new_identifier_node(char * variableName)
+ASTNode* new_identifier_node(char* variableName)
 {
-    ASTNode * node = new_ast_node(AST_IDENTIFIER);
+    ASTNode* node = new_ast_node(AST_IDENTIFIER);
     node->data.variable.variableName = variableName;
     node->data.variable.expression = NULL;
     return node;
 }
 
 /* Creates a new integer literal AST node */
-ASTNode * new_integer_literal(int value)
+ASTNode* new_integer_literal(int value)
 {
-	ASTNode * node = new_ast_node(AST_INT_LITERAL);
+	ASTNode* node = new_ast_node(AST_INT_LITERAL);
 	node->data.literal.intValue = value;
 
 	return node;
 }
 
 /* Creates a new float literal AST node */
-ASTNode * new_float_literal(float value)
+ASTNode* new_float_literal(float value)
 {
-	ASTNode * node = new_ast_node(AST_FLOAT_LITERAL);
+	ASTNode* node = new_ast_node(AST_FLOAT_LITERAL);
 	node->data.literal.floatValue = value;
 
 	return node;
 }
 
 /* Creates a new string literal AST node */
-ASTNode * new_string_literal(char * value)
+ASTNode* new_string_literal(char* value)
 {
-	ASTNode * node = new_ast_node(AST_STRING_LITERAL);
+	ASTNode* node = new_ast_node(AST_STRING_LITERAL);
 	node->data.literal.stringValue = strdup(value);
 
 	if (!node->data.literal.stringValue) 
@@ -65,18 +65,18 @@ ASTNode * new_string_literal(char * value)
 }
 
 /* Creates a new boolean literal AST node */
-ASTNode * new_bool_literal(int value)
+ASTNode* new_bool_literal(int value)
 {
-	ASTNode * node = new_ast_node(AST_BOOL_LITERAL);
+	ASTNode* node = new_ast_node(AST_BOOL_LITERAL);
 	node->data.literal.boolValue = value;
 
 	return node;
 }
 
 /* Creates a new binary operation AST node */
-ASTNode * new_binary_op(ASTNodeType type, ASTNode * left, ASTNode * right)
+ASTNode* new_binary_op(ASTNodeType type, ASTNode* left, ASTNode* right)
 {
-	ASTNode * node = new_ast_node(type);
+	ASTNode* node = new_ast_node(type);
 	node->data.binaryOp.left  = left;
 	node->data.binaryOp.right = right;
 
@@ -84,18 +84,18 @@ ASTNode * new_binary_op(ASTNodeType type, ASTNode * left, ASTNode * right)
 }
 
 /* Creates a new unary operation AST node */
-ASTNode * new_unary_op(ASTNodeType type, ASTNode * operand)
+ASTNode* new_unary_op(ASTNodeType type, ASTNode* operand)
 {
-	ASTNode * node = new_ast_node(type);
+	ASTNode* node = new_ast_node(type);
 	node->data.unaryOp.operand = operand;
 
 	return node;
 }
 
 /* Creates a new if-elif-else statement AST node */
-ASTNode * new_if_node(ASTNode * condition, ASTNode * thenBranch, ASTNode * elseBranch)
+ASTNode* new_if_node(ASTNode* condition, ASTNode* thenBranch, ASTNode* elseBranch)
 {
-	ASTNode * node = new_ast_node(AST_IF_STATEMENT);
+	ASTNode* node = new_ast_node(AST_IF_STATEMENT);
 
 	node->data.ifNode.condition  = condition;
 	node->data.ifNode.thenBranch = thenBranch;
@@ -105,14 +105,14 @@ ASTNode * new_if_node(ASTNode * condition, ASTNode * thenBranch, ASTNode * elseB
 }
 
 /* yeni bir 'for' döngüsü AST düğümü oluşturur */
-ASTNode * new_for_node(ASTNode * initialization,
-					   ASTNode * condition,
-					   ASTNode * increment,
-					   ASTNode * body)
+ASTNode * new_for_node(ASTNode* initialization,
+					   ASTNode* condition,
+					   ASTNode* increment,
+					   ASTNode* body)
 {
-    ASTNode * node = (ASTNode *)malloc(sizeof(ASTNode));
+    ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     if (node == NULL) {
-        fprintf(stderr, "Hata: For düğümü için bellek ayrılamadı!\n");
+        fprintf(stderr, "Error: cannot allocate memory for 'for' node\n");
         exit(EXIT_FAILURE);
     }
 
@@ -126,17 +126,17 @@ ASTNode * new_for_node(ASTNode * initialization,
     return node;
 }
 
-ASTNode * new_block_node(ASTNodeList * statements)
+ASTNode* new_block_node(ASTNodeList* statements)
 {
-	ASTNode * node = new_ast_node(AST_BLOCK);
+	ASTNode* node = new_ast_node(AST_BLOCK);
 	node->data.statements = statements;
 	return node;
 }
 
 /* Creates a new variable declaration or assignment AST node */
-ASTNode * new_variable_node(char * variableName, ASTNode * expression)
+ASTNode* new_variable_node(char* variableName, ASTNode* expression)
 {
-	ASTNode * node = new_ast_node(AST_VARIABLE_DECLARATION);
+	ASTNode* node = new_ast_node(AST_VARIABLE_DECLARATION);
 	node->data.variable.variableName = variableName;
 
 	if (!node->data.variable.variableName)
@@ -150,9 +150,9 @@ ASTNode * new_variable_node(char * variableName, ASTNode * expression)
 }
 
 /* Handling assignment operations */
-ASTNode * new_assignment_node(char * variableName, ASTNode * expression)
+ASTNode* new_assignment_node(char* variableName, ASTNode* expression)
 {
-	ASTNode * node = new_ast_node(AST_ASSIGNMENT_STATEMENT);
+	ASTNode* node = new_ast_node(AST_ASSIGNMENT_STATEMENT);
 	node->data.variable.variableName = variableName;
 
 	if (!node->data.variable.variableName)
@@ -166,10 +166,10 @@ ASTNode * new_assignment_node(char * variableName, ASTNode * expression)
 }
 
 /* Handling augmented assignment operations */
-ASTNode * new_augmented_assignment_node(ASTNodeType type, ASTNode * variable, ASTNode * expression)
+ASTNode* new_augmented_assignment_node(ASTNodeType type, ASTNode* variable, ASTNode* expression)
 {
 	/* Augmented assignment operation (e.g., x += y) is treated as a binary operation */
-	ASTNode * node = new_ast_node(type);
+	ASTNode* node = new_ast_node(type);
 	node->data.binaryOp.left = variable;
 	node->data.binaryOp.right = expression;
 
@@ -177,9 +177,9 @@ ASTNode * new_augmented_assignment_node(ASTNodeType type, ASTNode * variable, AS
 }
 
 /* Adds a new statement to a list of statements */
-ASTNodeList * add_statement_list(ASTNodeList * list, ASTNode * statement)
+ASTNodeList* add_statement_list(ASTNodeList* list, ASTNode* statement)
 {
-	ASTNodeList * new_head = (ASTNodeList *)malloc(sizeof(ASTNodeList));
+	ASTNodeList* new_head = (ASTNodeList*)malloc(sizeof(ASTNodeList));
 	if (!new_head)
 	{
 		fprintf(stderr, "Memory allocation failed\n");
@@ -190,18 +190,18 @@ ASTNodeList * add_statement_list(ASTNodeList * list, ASTNode * statement)
 	return new_head;
 }
 
-ASTNodeList * new_statement_list(ASTNode * first, ASTNode * second)
+ASTNodeList* new_statement_list(ASTNode* first, ASTNode* second)
 {
-	ASTNodeList * list = NULL;
+	ASTNodeList* list = NULL;
 	list = add_statement_list(list, first);
 	list = add_statement_list(list, second);
 
 	return list;
 }
 
-ASTNodeList * create_statement_list(ASTNode * statement)
+ASTNodeList* create_statement_list(ASTNode* statement)
 {
-	ASTNodeList * list = (ASTNodeList *)malloc(sizeof(ASTNodeList));
+	ASTNodeList* list = (ASTNodeList*)malloc(sizeof(ASTNodeList));
 
 	if (!list)
 	{
@@ -214,12 +214,12 @@ ASTNodeList * create_statement_list(ASTNode * statement)
 	return list;
 }
 
-ASTNodeList * merge_statement_lists(ASTNodeList * list1, ASTNodeList * list2)
+ASTNodeList* merge_statement_lists(ASTNodeList* list1, ASTNodeList* list2)
 {
 	if (!list1) return list2;
 	if (!list2) return list1;
 
-	ASTNodeList * current = list1;
+	ASTNodeList* current = list1;
 
 	while (current->next)
 	{
@@ -231,7 +231,7 @@ ASTNodeList * merge_statement_lists(ASTNodeList * list1, ASTNodeList * list2)
 }
 
 /* Frees the memory of an AST node and its children */
-void free_ast_node(ASTNode * node)
+void free_ast_node(ASTNode* node)
 {
 	if (!node)
 	{
@@ -299,7 +299,7 @@ static void print_prefix(int indent, int is_last)
 }
 
 /* display the all ast */
-void display_ast(ASTNode * node, int indent, int is_last) {
+void display_ast(ASTNode* node, int indent, int is_last) {
     if (node == NULL) return;
 
     print_prefix(indent, is_last);
@@ -338,20 +338,20 @@ void display_ast(ASTNode * node, int indent, int is_last) {
             printf("Assignment: %s\n", node->data.variable.variableName);
             display_ast(node->data.variable.expression, indent + 1, 1);
             break;
-        case AST_PLUS: printf("BinaryOp: PLUS\n"); break;
-        case AST_MINUS: printf("BinaryOp: MINUS\n"); break;
-        case AST_MULTIPLY: printf("BinaryOp: MULTIPLY\n"); break;
-        case AST_DIVIDE: printf("BinaryOp: DIVIDE\n"); break;
-        case AST_MODULO: printf("BinaryOp: MODULO\n"); break;
-        case AST_POWER: printf("BinaryOp: POWER\n"); break;
-        case AST_AND: printf("BinaryOp: AND\n"); break;
-        case AST_OR: printf("BinaryOp: OR\n"); break;
-        case AST_LESS_THAN: printf("BinaryOp: <\n"); break;
-        case AST_GREATER_THAN: printf("BinaryOp: >\n"); break;
-        case AST_LESS_EQUAL: printf("BinaryOp: <=\n"); break;
-        case AST_GREATER_EQUAL: printf("BinaryOp: >=\n"); break;
-        case AST_EQUAL: printf("BinaryOp: ==\n"); break;
-        case AST_NOT_EQUAL: printf("BinaryOp: !=\n"); break;
+        case AST_PLUS: 			printf("BinaryOp: PLUS\n"); 	break;
+        case AST_MINUS: 		printf("BinaryOp: MINUS\n"); 	break;
+        case AST_MULTIPLY: 		printf("BinaryOp: MULTIPLY\n"); break;
+        case AST_DIVIDE: 		printf("BinaryOp: DIVIDE\n"); 	break;
+        case AST_MODULO: 		printf("BinaryOp: MODULO\n"); 	break;
+        case AST_POWER: 		printf("BinaryOp: POWER\n"); 	break;
+        case AST_AND: 			printf("BinaryOp: AND\n"); 		break;
+        case AST_OR: 			printf("BinaryOp: OR\n"); 		break;
+        case AST_LESS_THAN: 	printf("BinaryOp: <\n"); 		break;
+        case AST_GREATER_THAN: 	printf("BinaryOp: >\n"); 		break;
+        case AST_LESS_EQUAL: 	printf("BinaryOp: <=\n"); 		break;
+        case AST_GREATER_EQUAL: printf("BinaryOp: >=\n"); 		break;
+        case AST_EQUAL: 		printf("BinaryOp: ==\n"); 		break;
+        case AST_NOT_EQUAL: 	printf("BinaryOp: !=\n"); 		break;
         case AST_NOT:
             printf("UnaryOp: NOT\n");
             display_ast(node->data.unaryOp.operand, indent + 1, 1);
@@ -393,16 +393,18 @@ void display_ast(ASTNode * node, int indent, int is_last) {
             break;
     }
 
-    if (node->type >= AST_PLUS && node->type <= AST_NOT_EQUAL) {
+    if (node->type >= AST_PLUS && node->type <= AST_NOT_EQUAL) 
+	{
         display_ast(node->data.binaryOp.left, indent + 1, 0);
         display_ast(node->data.binaryOp.right, indent + 1, 1);
     }
 }
 
-void display_ast_list(ASTNodeList * list, int indent)
+void display_ast_list(ASTNodeList* list, int indent)
 {
-    ASTNodeList * current = list;
-    while (current != NULL) {
+    ASTNodeList* current = list;
+    while (current != NULL) 
+	{
         display_ast(current->statement, indent, current->next == NULL);
         current = current->next;
     }

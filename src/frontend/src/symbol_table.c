@@ -1,22 +1,24 @@
+/* src/frontend/src/symbol_table.c */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-// local includes
+/* local includes */
 #include <symbol_table.h>
 
-SymbolTable * symbol_table = NULL;
+SymbolTable* symbol_table = NULL;
 
-SymbolTable * create_symbol_table()
+SymbolTable* create_symbol_table()
 {
     return NULL;
 }
 
-void set_var(SymbolTable ** table, char * name, Variable value)
+void set_var(SymbolTable** table, char* name, Variable value)
 {
     if (*table == NULL)
     {
-        *table = (SymbolTable *)malloc(sizeof(SymbolTable));
+        *table = (SymbolTable*)malloc(sizeof(SymbolTable));
         (*table)->name = strdup(name);
         (*table)->value = value;
         (*table)->next = NULL;
@@ -24,7 +26,7 @@ void set_var(SymbolTable ** table, char * name, Variable value)
 
     else
     {
-        SymbolTable * entry = *table;
+        SymbolTable* entry = *table;
 
         while (entry != NULL)
         {
@@ -32,12 +34,11 @@ void set_var(SymbolTable ** table, char * name, Variable value)
             {
                 char error_msg_buffer[100];
                 sprintf(error_msg_buffer, "Error: Variable '%s' is already defined.\n", name);
-
                 yyerror(error_msg_buffer);
             }
             entry = entry->next;
         }
-        SymbolTable *newEntry = (SymbolTable *)malloc(sizeof(SymbolTable));
+        SymbolTable* newEntry = (SymbolTable*)malloc(sizeof(SymbolTable));
         newEntry->name = strdup(name);
         newEntry->value = value;
         newEntry->next = *table;
@@ -61,7 +62,7 @@ void set_var(SymbolTable ** table, char * name, Variable value)
 
 ------------------------------------------------*/
 
-Variable * get_var(SymbolTable * table, char * name)
+Variable* get_var(SymbolTable* table, char* name)
 {
     while (table != NULL)
     {
@@ -74,11 +75,11 @@ Variable * get_var(SymbolTable * table, char * name)
     return NULL;
 }
 
-void free_symbol_table(SymbolTable * table)
+void free_symbol_table(SymbolTable* table)
 {
     while (table != NULL)
     {
-        SymbolTable * temp = table;
+        SymbolTable* temp = table;
         table = table->next;
         free(temp->name);
         destroy_variable(&temp->value); /* Değişkeni serbest bırak */
@@ -86,9 +87,9 @@ void free_symbol_table(SymbolTable * table)
     }
 }
 
-void print_symbol_table(SymbolTable * table)
+void print_symbol_table(SymbolTable* table)
 {
-    SymbolTable * entry = table;
+    SymbolTable* entry = table;
 
     printf("Symbol Table:\n");
     printf("-----------------------------\n");
@@ -122,4 +123,18 @@ void print_symbol_table(SymbolTable * table)
         entry = entry->next;
     }
     printf("-----------------------------\n");
+}
+
+void destroy_variable(Variable* var)
+{
+    if (var == NULL)
+    {
+        return;
+    }
+
+    if (var->type == STRING_TYPE && var->value.strval != NULL)
+    {
+        free(var->value.strval);
+        var->value.strval = NULL;
+    }
 }

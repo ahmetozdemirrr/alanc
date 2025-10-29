@@ -1,9 +1,10 @@
+/* src/frontend/src/parser/lexer/lexer.l */
+
 %{
     #include <stdio.h>
     #include <stdlib.h>
 
-    // local includes
-    #include <variables.h>
+    /* local includes */
     #include <ast.h>
     #include "../parser/parser.tab.h" /* BİSON generates this file */
 

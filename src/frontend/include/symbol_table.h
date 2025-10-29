@@ -1,26 +1,53 @@
+/* src/frontend/include/symbol_table.h */
+
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
-#include "variables.h"
-#include "utils.h"
+#include <utils.h>
+
+typedef enum 
+{
+    NULL_TYPE,
+    INT_TYPE,
+    FLOAT_TYPE,
+    STRING_TYPE,
+    BOOL_TYPE
+} 
+VariableType;
+
+typedef union 
+{
+    int    boolval;
+    int    intval;
+    char*  strval;
+    double floatval;
+} 
+Value;
+
+typedef struct 
+{
+    VariableType type;
+    Value value;
+} 
+Variable;
 
 typedef struct SymbolTable 
 {   
 	/*----------------------------- Symbol's --------------------- */
-	char * name;                /* -> name                         */
+	char* name;                 /* -> name                         */
 	Variable value;             /* -> variable type and it's value */
-	struct SymbolTable * next;  /* -> next symbol('s)              */
+	struct SymbolTable*  next;  /* -> next symbol('s)              */
 } 
 SymbolTable;
 
-extern SymbolTable * symbol_table;
+extern SymbolTable* symbol_table;
 
-SymbolTable * create_symbol_table();
-Variable * get_var(SymbolTable * table, char * name);
+SymbolTable* create_symbol_table();
+Variable* get_var(SymbolTable* table, char* name);
 
-void set_var(SymbolTable ** table, char * name, Variable value);
-void free_symbol_table(SymbolTable * table);
-void print_symbol_table(SymbolTable * table);
+void set_var(SymbolTable** table, char* name, Variable value);
+void free_symbol_table(SymbolTable* table);
+void print_symbol_table(SymbolTable* table);
 
 #endif /* SYMBOL_TABLE_H */
 
