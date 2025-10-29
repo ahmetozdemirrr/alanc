@@ -8,7 +8,10 @@ SRC_DIR = src
 
 # --- Compiler & Linker Flags ---
 CFLAGS = -g -Wall -Wextra -std=gnu11
-CPPFLAGS = -I$(SRC_DIR)/common/include -I$(SRC_DIR)/frontend/include -I$(BUILD_DIR)/frontend/src/parser
+CPPFLAGS = 	-I$(SRC_DIR)/common/include 			\
+			-I$(SRC_DIR)/frontend/include 			\
+			-I$(BUILD_DIR)/frontend/src/parser 		\
+			-I$(BUILD_DIR)/preprocessor/src/parser
 LDFLAGS =
 LDLIBS = -lfl -lm
 

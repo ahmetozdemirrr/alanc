@@ -12,9 +12,14 @@
 
     #define YYDEBUG 1
 
-    extern FILE* yyin;
-    extern int yydebug;
+    extern FILE* frontend_yyin;
+    extern int frontend_yydebug;
+
+    int frontend_yylex(void);
+    void frontend_yyerror(const char* s);
 %}
+
+%define api.prefix {frontend_yy}
 
 %union
 {
@@ -78,6 +83,8 @@
 %right UNARY_MINUS
 %right OP_POW
 %nonassoc KW_ELSE /* for dangling else */
+
+%locations /* for diagnostic macros */
 
 %%
     PROGRAM:
@@ -221,45 +228,45 @@
         ;
 %%
 
+/*
 int main(int argc, char * argv[])
 {
 #ifdef YYDEBUG
-    yydebug = 1;
+    frontend_yydebug = 1;
 #else
-    yydebug = 0;
+    frontend_yydebug = 0;
 #endif
-yydebug = 0;
+frontend_yydebug = 0;
 
     symbol_table = create_symbol_table();
 
     if (argc == 1)
     {
         printf("Type (ctrl+c) for exit\n");
-        yyparse();
+        frontend_yyparse();
 
         if (program_root)
         {
             printf("\nDisplaying AST:\n");
             display_ast(program_root, 0, 1);
         }
-        yyclearin;
     }
 
     else if (argc == 2)
     {
-        yyin = fopen(argv[1], "r");
-        if (yyin == NULL)
+        frontend_yyin = fopen(argv[1], "r");
+        if (frontend_yyin == NULL)
         {
             printf("File not found\n");
             return 0;
         }
 
-        if (yyparse() == 0 && program_root)
+        if (frontend_yyparse() == 0 && program_root)
         {
             printf("\nDisplaying AST:\n");
             display_ast(program_root, 0, 1);
         }
-        fclose(yyin);
+        fclose(frontend_yyin);
     }
 
     else
@@ -269,4 +276,13 @@ yydebug = 0;
         return 0;
     }
     return 0;
+}
+*/
+
+void frontend_yyerror(const char* s)
+{
+    fprintf(stderr, "Error: line %d, column %d: %s\n", 
+            frontend_yylloc.first_line, 
+            frontend_yylloc.first_column,
+            s);
 }

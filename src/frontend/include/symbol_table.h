@@ -48,6 +48,8 @@ Variable* get_var(SymbolTable* table, char* name);
 void set_var(SymbolTable** table, char* name, Variable value);
 void free_symbol_table(SymbolTable* table);
 void print_symbol_table(SymbolTable* table);
+void destroy_variable(Variable* var);
+void frontend_error(const char* error_msg);
 
 #endif /* SYMBOL_TABLE_H */
 

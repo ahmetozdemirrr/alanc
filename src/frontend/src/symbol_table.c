@@ -34,7 +34,7 @@ void set_var(SymbolTable** table, char* name, Variable value)
             {
                 char error_msg_buffer[100];
                 sprintf(error_msg_buffer, "Error: Variable '%s' is already defined.\n", name);
-                yyerror(error_msg_buffer);
+                frontend_yyerror(error_msg_buffer);
             }
             entry = entry->next;
         }

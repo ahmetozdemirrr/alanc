@@ -1,0 +1,84 @@
+/*
+ * Bu dosya, flex tabanlı C preprocessor lexer'ını test etmek için tasarlanmıştır.
+ * C-stili çok satırlı bir yorumdur.
+ */
+
+// Tek satırlık C++ stili bir yorum.
+
+#include <stdio.h>
+#include "my_local_header.h" // String literal ile include
+
+// Makro tanımlamaları
+#define VERSION          101
+#define PI               3.14
+#define GREETING         "Hello, World!"
+#define DEBUG_CHAR       'D'
+#define ADD(a, b)        (a + b)
+
+// Stringleştirme (#) ve Birleştirme (##) operatörleri
+#define STRINGIFY(s)     #s
+#define PASTE(a, b)      a##b
+
+// Çok satırlı makro (satır birleştirme '\' testi)
+#define COMPLEX_MACRO(x, y, z) \
+    ((x) * (y)) + \
+    (z >> 2)
+
+#undef VERSION // Tanımlanmış bir makroyu kaldırma
+
+// Koşullu derleme blokları
+#if defined(DEBUG) && (DEBUG_LEVEL > 1 || !defined(RELEASE))
+    int debug_variable = 1;
+#elif defined(TEST_MODE)
+    const char* mode = "Test";
+#else
+    // Else bloğu
+#endif
+
+#ifdef PLATFORM_X64
+    long long large_number = 1234567890LL;
+#endif
+
+#ifndef SOME_FLAG
+    // Bayrak tanımlı değilse bu kısım işlenir.
+#endif
+
+// Diğer yönergeler
+#error "Bu bir zorunlu derleme hatasıdır!"
+#warning "Bu sadece bir uyarı mesajıdır."
+#pragma once
+#line 200 "new_filename.c"
+
+/* Çeşitli tokenların testi */
+
+int main() {
+    int _identifier_with_underscore = 0;
+    float value = 123.456;
+
+    // Tüm operatörler ve noktalama işaretleri
+    int x = (5 + 3) * 2;
+    int y = x / 4 - 1;
+    x++;
+    y--;
+    if (x <= y && x != 0) {
+        y <<= 2;
+        x >>= 1;
+    }
+
+    int z = (x > y) ? x : y; // Ternary operatör
+    int* ptr;
+    struct Point { int x; int y; };
+    struct Point p;
+    p.x = 1;
+    ptr = &p.x;
+    p.x -> y; // Geçersiz olsa da -> token'ını test eder
+
+    // Diğer semboller
+    int arr[10];
+    arr[0] = {1, 2, 3};
+    my_func(a, ...);
+}
+
+// Geçersiz karakterler
+$
+@

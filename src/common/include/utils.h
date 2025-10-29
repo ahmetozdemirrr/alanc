@@ -11,10 +11,6 @@
  * that are used across the compiler, especially by the parser.
  */
 
-extern int yylineno;
-extern int yycolumn;
-
-int yylex(void);
-void yyerror(const char* s);
+void frontend_yyerror(const char* s);
 
 #endif /* UTILS_H_ */
