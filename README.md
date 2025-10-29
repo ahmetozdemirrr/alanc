@@ -1,82 +1,50 @@
-# Proje Yönerge Raporu
-
-## Proje Tanımı
-...
-
-Proje tamamen **açık kaynak** araçlar kullanılarak gerçekleştirilecektir. Bu araçlar dilin lexik analizinden, parçacık üretimine, derlenmesine ve optimizasyonuna kadar tüm aşamalarda kullanılacaktır.
-
-## Amaç ve önemli özellikler
-- Basit ve derlenebilen bir dil modeli.
-- Statik tipleme, fonksiyonel ve logic özellikler.
-- Türler açısından sadelik
-- Belleğe erişimli
-- Katı ve sade built-in işlevler
-- Optimizasyon odaklı
-- Derlenebilir bir yapı kurmak ve bu süreci açık kaynak araçlarla yürütmek.
-- Proje aşamalarını yönetmek ve açık kaynak platformlarda paylaşmak.
-
-## Kullanılacak Araçlar
-
-### 1. **Flex**
-- **Görevi**: Lexik analiz yaparak kaynak kodu tokenlere ayırmak.
-- **Sorumluluk**: Dilin girdisini (örneğin, değişken isimleri, sayılar ve işleçler) ayrıştırarak anlamlı parçalara ayıracak.
-
-### 2. **Bison**
-- **Görevi**: Parçacık (parser) üretmek.
-- **Sorumluluk**: Flex tarafından üretilen tokenlere göre dilin sözdizimini oluşturacak.
-
-### 3. **LLVM**
-- **Görevi**: Dilin makine koduna derlenmesi ve optimize edilmesi.
-- **Sorumluluk**: Düşük seviyede kod üretilmesini sağlayacak. LLVM, dilin arka ucunda çalışarak derleme ve optimizasyon yapacak.
-
-### 4. **Make**
-- **Görevi**: Projenin derlenmesi, kurulması ve test edilmesi için kontrol
-  merkezi.
-- **Sorumluluk**: Projenin farklı parçalarını uygun araçlar kullanarak
-  derleyecek.
-
-### 5. **Git**
-- **Görevi**: Versiyon kontrolü.
-- **Sorumluluk**: Proje dosyalarının sürüm takibini yapacak ve açık kaynak olarak paylaşımı yönetecek.
-
-Örnek bir kod:
+Sample Code:
 
 ```
-include standart.ALan
+/* main.alan */
 
-function foo(int a, float b)
+#include <standart.alan>
+
+#define PI 3.14
+
+function foo(int a, float b) : float
 {
-    return (a * (b * 3));
+		if (a)
+		{
+				return foo(a - 1, b) * b;
+		} 
+    return b;
 }
 
-procedure poo()
+procedure poo(float input) : void
 {
     bool b1 = true;
     bool b2 = false;
 
     if (b1 == b2)
     {
-        b1 -> b2;
+        b1 -> (bool) input;
     }
 
     else
     {
+				print("Procedure end!");
         return;
-    }
-
-    print(Procedure end!);
+  	} 
 }
 
-procedure main()
+procedure main() : int
 {
-    int array[] = {2, 3, 4};
+    int a;
+		float b;
 
-    poo(foo());
+		input("Enter a number:", &a);
+		input("Enter a number:", &b);
 
-    input(Enter a number:);
+    poo(foo(a, b));
 
     return EXIT_SUCCESS;
 }
 
-# This is a comment and this is a expression ; x = y + 5 (but in a comment line)
+// This is a comment and this is a expression ; x = y + 5 (but in a comment line)
 ```
