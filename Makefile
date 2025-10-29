@@ -13,7 +13,7 @@ CPPFLAGS = 	-I$(SRC_DIR)/common/include 			\
 			-I$(BUILD_DIR)/frontend/src/parser 		\
 			-I$(BUILD_DIR)/preprocessor/src/parser
 LDFLAGS =
-LDLIBS = -lfl -lm
+LDLIBS = -lm
 
 # --- Automatic File Detection ---
 # Finds all .c, .y, and .l files under the SRC_DIR.
