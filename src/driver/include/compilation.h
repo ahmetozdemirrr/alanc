@@ -1,10 +1,22 @@
-/* src/common/include/compiler_context.h */
+/* src/common/include/compilation.h */
 
-#ifndef COMPILER_CONTEXT_H
-#define COMPILER_CONTEXT_H
+/**
+ * - Diagnostics Engine
+ * - Source Manager
+ * - Target information
+ * - AST root node
+ */
+#ifndef COMPILATION_H
+#define COMPILATION_H
 
 /* local includes */
 #include <arena_core.h>
+#include <ast.h>
+
+/* forward declarations */
+struct DiagnosticEngine;
+struct SourceManager;
+struct TargetInfo;
 
 /**
  * @struct CompilerContext
@@ -28,23 +40,28 @@ typedef struct
      * This arena is reset between phases using `arena_reset()` for high efficiency.
      */
     Arena* transient_arena;
+
+    struct SourceManager* source_manager;
+    struct DiagnosticEngine* diagnostics;
+    struct TargetInfo* target_info;
+    ASTNode* ast_root;
 }
-CompilerContext;
+Compilation;
 
 
 /**
  * @brief Creates a new compiler context and initializes its memory arenas.
  * @param persistent_capacity Size in bytes to allocate for the persistent arena.
  * @param transient_capacity Size in bytes to allocate for the transient arena.
- * @return A pointer to the initialized CompilerContext, or NULL on error.
+ * @return A pointer to the initialized Compilation, or NULL on error.
  */
-CompilerContext* context_init(size_t persistent_capacity, size_t transient_capacity);
+Compilation* compilation_create(size_t persistent_capacity, size_t transient_capacity);
 
 /**
  * @brief Frees the compiler context and all arenas it owns.
  * @param context The compiler context to be freed.
  */
-void context_free(CompilerContext* context);
+void compilation_destroy(Compilation* comp);
 
 
-#endif /* COMPILER_CONTEXT_H */
+#endif /* COMPILATION_H */
