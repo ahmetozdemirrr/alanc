@@ -25,28 +25,61 @@ ht_hash(const char* key)
 }
 
 HashTable* 
-ht_create(size_t capacity)
+ht_create(Arena* arena, size_t capacity)
 {
-	/* TODO: Implementation needed.
-	 * 1. Allocate memory for the HashTable struct.
-	 * 2. Allocate memory for the 'buckets' array (size = capacity * sizeof(HashNode*)).
-	 * 3. Initialize all buckets to NULL.
-	 * 4. Set table->capacity and table->size.
-	 * 5. Return the new table.
-	 */
-	 return NULL;
+	if (NULL == arena)
+	{
+		return NULL;
+	}
+
+	HashTable* table = arena_alloc(arena, sizeof(HashTable), FALSE);
+	if (NULL == table)
+	{
+		fprintf(stderr, "Error: creating hash table");
+		return NULL;
+	}
+
+	HashNode* nodes = arena_alloc(arena, capacity * sizeof(HashNode*), TRUE);
+	if (NULL == nodes)
+	{
+		fprintf(stderr, "Error: creating hash table");
+		return NULL;
+	}
+
+	table->buckets  = (HashNode**)nodes;
+	table->size     = 0;
+	table->capacity = capacity;
+
+	return table;
 }
 
 void 
 ht_free(HashTable* table)
 {
-	/* TODO: Implementation needed.
-	 * 1. Iterate through each bucket.
-	 * 2. For each bucket, iterate through the linked list of HashNodes.
-	 * 3. Free each HashNode.
-	 * 4. Free the 'buckets' array.
-	 * 5. Free the HashTable struct itself.
-	 */
+	/* no need ht_free for arena allocator logic*/
+	/* 	
+	if (NULL == table)
+	{
+		return;
+	}
+
+	for (int i = 0; i < table->capacity; i++)
+	{
+		HashNode* node = table->buckets[i];
+
+		while (NULL != node)
+		{
+			HashNode* next_node = node->next;
+
+			free(node->key);
+			free(node);
+
+			node = next_node;
+		}
+	}
+	free(table->buckets);
+	free(table); 
+	*/
 }
 
 void 

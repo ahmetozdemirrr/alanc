@@ -5,7 +5,7 @@
 #include <utils.h>
 
 void* 
-arena_alloc(Arena* arena, size_t size)
+arena_alloc(Arena* arena, size_t size, ALANC_BOOLEAN_TYPE init_with_null)
 {
     if (!arena)
     {
@@ -37,6 +37,10 @@ arena_alloc(Arena* arena, size_t size)
     void* ptr     = arena->memory  + aligned_offset;
     arena->offset = aligned_offset + size;
 
+    if (init_with_null)
+    {
+        memset(ptr, 0, size);
+    }
     return ptr;
 }
 

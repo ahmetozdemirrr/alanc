@@ -4,9 +4,11 @@
 #define ARENA_ALLOCATOR_H
 
 #include <stddef.h> 
+#include <string.h>
 
 /* local includes */
 #include <arena_core.h>
+#include <alanc_types.h>
 
 /**
  * @def ARENA_ALIGNMENT_SIZE
@@ -28,7 +30,7 @@
  * @return A void pointer to the start of the allocated block, or NULL if
  * the arena is out of memory or the inputs are invalid.
  */
-void* arena_alloc(Arena* arena, size_t size);
+void* arena_alloc(Arena* arena, size_t size, ALANC_BOOLEAN_TYPES init_with_null);
 
 /**
  * @brief Resets an arena, making its memory available for new allocations.

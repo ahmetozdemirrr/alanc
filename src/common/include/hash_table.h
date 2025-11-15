@@ -5,6 +5,8 @@
 
 #include <stddef.h>
 
+/* local includes */
+#include <arena_allocator.h>
 
 /**
  * @struct HashNode
@@ -39,7 +41,7 @@ typedef struct
 HashTable;
 
 
-HashTable* ht_create(size_t capacity);
+HashTable* ht_create(Arena* arena, size_t capacity);
 void ht_free(HashTable* table);
 void ht_insert(HashTable* table, const char* key, void* value);
 void* ht_lookup(HashTable* table, const char* key);

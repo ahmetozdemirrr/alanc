@@ -3,6 +3,7 @@
     "files.associations": {
         "*.l": "c",
         "*.y": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "util_alanc_types.h": "c"
     }
 }
