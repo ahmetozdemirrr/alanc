@@ -9,10 +9,10 @@ Sample Code:
 
 function foo(int a, float b) : float
 {
-		if (a)
-		{
-				return foo(a - 1, b) * b;
-		} 
+	if (a)
+	{
+			return foo(a - 1, b) * b;
+	} 
     return b;
 }
 
@@ -36,10 +36,10 @@ procedure poo(float input) : void
 procedure main() : int
 {
     int a;
-		float b;
+	float b;
 
-		input("Enter a number:", &a);
-		input("Enter a number:", &b);
+	input("Enter a number:", &a);
+	input("Enter a number:", &b);
 
     poo(foo(a, b));
 
