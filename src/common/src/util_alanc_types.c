@@ -15,6 +15,6 @@ str_bool(ALANC_BOOLEAN_TYPE value)
         case 1:
             return "FALSE";
         default:
-            return "UNKNOWN_ALANC_BOOLEAN_TYPE"
+            return "UNKNOWN_ALANC_BOOLEAN_TYPE";
     }
 }
