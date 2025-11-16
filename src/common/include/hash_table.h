@@ -4,6 +4,7 @@
 #define HASH_TABLE_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 /* local includes */
 #include <arena_allocator.h>
