@@ -30,7 +30,7 @@
  * @return A void pointer to the start of the allocated block, or NULL if
  * the arena is out of memory or the inputs are invalid.
  */
-void* arena_alloc(Arena* arena, size_t size, ALANC_BOOLEAN_TYPES init_with_null);
+void* arena_alloc(Arena* arena, size_t size, ALANC_BOOLEAN_TYPE init_with_null);
 
 /**
  * @brief Resets an arena, making its memory available for new allocations.
